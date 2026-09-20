@@ -11,7 +11,7 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
-  // Design System Colors
+  // design system colors
   static const Color primaryColor = Color(0xFF6C5CE7);     // Ungu Utama
   static const Color secondaryColor = Color(0xFFC7B8ED);   // Ungu Muda
   static const Color accentPinkColor = Color(0xFFE17DA0);  // Pink / Rose
@@ -20,7 +20,7 @@ class _SplashScreenState extends State<SplashScreen>
 
   late AnimationController _controller;
 
-  // Animations
+  // animasi
   late Animation<double> _dotsRotation;
   late Animation<double> _dotsRadius;
   late Animation<double> _dotsOpacity;
@@ -30,7 +30,7 @@ class _SplashScreenState extends State<SplashScreen>
 
   late Animation<double> _textOpacity;
 
-  // Smooth Color Transition Animations
+  // color transition animations
   late Animation<Color?> _backgroundColorAnimation;
   late Animation<Color?> _titleTextColorAnimation;
   late Animation<Color?> _subtitleTextColorAnimation;
@@ -40,58 +40,58 @@ class _SplashScreenState extends State<SplashScreen>
   void initState() {
     super.initState();
 
-    // Durasi total dinaikkan dari 3200ms ke 4200ms (+1 detik)
+    // durasi
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 4200),
+      duration: const Duration(milliseconds: 5200),
     );
 
-    // 1. TAHAP TITIK-TITIK BERPUTAR (0% - 35% durasi)
+    // 1. titik titik mutar (0% - 25% durasi)
     _dotsRotation = Tween<double>(begin: 0, end: math.pi).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: const Interval(0.0, 0.35, curve: Curves.easeInOutCubic),
+        curve: const Interval(0.0, 0.25, curve: Curves.easeInOutCubic),
       ),
     );
 
     _dotsRadius = Tween<double>(begin: 1.0, end: 0.1).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: const Interval(0.20, 0.35, curve: Curves.easeInBack),
+        curve: const Interval(0.15, 0.25, curve: Curves.easeInBack),
       ),
     );
 
     _dotsOpacity = Tween<double>(begin: 1.0, end: 0.0).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: const Interval(0.30, 0.35, curve: Curves.easeOut),
+        curve: const Interval(0.20, 0.25, curve: Curves.easeOut),
       ),
     );
 
-    // 2. TAHAP MUNCUL BULAN GRADASI (30% - 50% durasi)
+    // 2. muncul bulan gradasi (22% - 38% durasi)
     _crescentScale = Tween<double>(begin: 0.1, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: const Interval(0.30, 0.52, curve: Curves.easeOutBack),
+        curve: const Interval(0.22, 0.38, curve: Curves.easeOutBack),
       ),
     );
 
     _crescentOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: const Interval(0.30, 0.42, curve: Curves.easeIn),
+        curve: const Interval(0.22, 0.32, curve: Curves.easeIn),
       ),
     );
 
-    // 3. TAHAP TRANSISI WARNA SMOOTH KE UNGU & LOGO JADI PUTIH
-    // Dimulai dari 58% sampai 78% (Mebuat bulan gradasi 'tahan' +1 detik lebih lama)
+
+    // 3. transisi warna ke ungu, bulan jd putih (65% - 82% durasi)
     _backgroundColorAnimation = ColorTween(
-      begin: whiteColor,
+      begin: const Color(0xFFF7F3EE),
       end: primaryColor,
     ).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: const Interval(0.58, 0.78, curve: Curves.easeInOut),
+        curve: const Interval(0.65, 0.82, curve: Curves.easeInOut),
       ),
     );
 
@@ -101,7 +101,7 @@ class _SplashScreenState extends State<SplashScreen>
     ).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: const Interval(0.58, 0.78, curve: Curves.easeInOut),
+        curve: const Interval(0.65, 0.82, curve: Curves.easeInOut),
       ),
     );
 
@@ -111,28 +111,28 @@ class _SplashScreenState extends State<SplashScreen>
     ).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: const Interval(0.58, 0.78, curve: Curves.easeInOut),
+        curve: const Interval(0.65, 0.82, curve: Curves.easeInOut),
       ),
     );
 
     _logoWhiteTransition = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: const Interval(0.60, 0.80, curve: Curves.easeInOut),
+        curve: const Interval(0.67, 0.84, curve: Curves.easeInOut),
       ),
     );
 
-    // 4. TAHAP TEKS & TAGLINE (75% - 95% durasi)
+    // 4. teks bawah bulan (80% - 95% durasi)
     _textOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: const Interval(0.75, 0.95, curve: Curves.easeIn),
+        curve: const Interval(0.80, 0.95, curve: Curves.easeIn),
       ),
     );
 
     _controller.forward();
 
-    Timer(const Duration(milliseconds: 4500), () {
+    Timer(const Duration(milliseconds: 5500), () {
       // TODO: Navigasi ke halaman berikutnya
     });
   }
@@ -159,14 +159,14 @@ class _SplashScreenState extends State<SplashScreen>
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Area Animasi Logo
+                  // animasi logo
                   SizedBox(
                     width: 140,
                     height: 140,
                     child: Stack(
                       alignment: Alignment.center,
                       children: [
-                        // --- LAYER 1: Titik-titik (Cycle Ring) ---
+                        // layer 1, untuk titik titik
                         if (_dotsOpacity.value > 0)
                           Opacity(
                             opacity: _dotsOpacity.value,
@@ -185,7 +185,7 @@ class _SplashScreenState extends State<SplashScreen>
                             ),
                           ),
 
-                        // --- LAYER 2: Crescent Ring (Transisi ke Putih) ---
+                        // layer 2, transisi ke putih
                         if (_crescentOpacity.value > 0)
                           Opacity(
                             opacity: _crescentOpacity.value,
@@ -208,7 +208,7 @@ class _SplashScreenState extends State<SplashScreen>
 
                   const SizedBox(height: 28),
 
-                  // --- LAYER 3: Wordmark & Tagline ---
+                  // layer 3, wordmark
                   Opacity(
                     opacity: _textOpacity.value,
                     child: Column(
