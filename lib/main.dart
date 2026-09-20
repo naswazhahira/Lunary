@@ -13,10 +13,12 @@ class LunaryApp extends StatelessWidget {
     return MaterialApp(
       title: 'Lunary',
       debugShowCheckedModeBanner: false,
+
       theme: ThemeData(
         scaffoldBackgroundColor: const Color(0xFFF7F3EE),
         useMaterial3: true,
       ),
+
       home: const SplashScreen(),
     );
   }
