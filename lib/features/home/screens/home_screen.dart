@@ -14,7 +14,7 @@ class _HomeScreenState extends State<HomeScreen> {
   // Color Palette
   static const Color primaryPink = Color(0xFFED5589);
   static const Color primaryPurple = Color(0xFF6C5CE7);
-  static const Color darkTextColor = Color(0xFF4A3E62);
+  static const Color darkTextColor = Color(0xFF2E2A4A); // Disesuaikan lebih gelap
   static const Color subTextColor = Color(0xFF8E82A3);
 
   @override
@@ -26,8 +26,8 @@ class _HomeScreenState extends State<HomeScreen> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Color(0xFFF3E7FC), // Gradient ungu lembut atas
-              Color(0xFFFCEBF3), // Gradient pink lembut bawah
+              Color(0xFFF3E7FC),
+              Color(0xFFFCEBF3),
             ],
           ),
         ),
@@ -44,9 +44,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       _buildHeader(),
                       const SizedBox(height: 20),
                       _buildCalendarStrip(),
-                      const SizedBox(height: 32),
-                      _buildCycleRingWidget(),
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 36),
+                      _buildCycleRingWidget(), // Bagian ini diperbarui
+                      const SizedBox(height: 36),
                       _buildArticleCard(),
                       const SizedBox(height: 16),
                     ],
@@ -89,7 +89,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         ),
-        // Tombol profil bulat
         Container(
           width: 45,
           height: 45,
@@ -161,7 +160,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildDateBadge(String date, String type) {
     const double size = 36;
-
     if (type == 'filled') {
       return Container(
         width: size,
@@ -171,14 +169,7 @@ class _HomeScreenState extends State<HomeScreen> {
           shape: BoxShape.circle,
         ),
         child: Center(
-          child: Text(
-            date,
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-            ),
-          ),
+          child: Text(date, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
         ),
       );
     } else if (type == 'outlined') {
@@ -190,14 +181,7 @@ class _HomeScreenState extends State<HomeScreen> {
           border: Border.all(color: primaryPurple, width: 2),
         ),
         child: Center(
-          child: Text(
-            date,
-            style: const TextStyle(
-              color: darkTextColor,
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-            ),
-          ),
+          child: Text(date, style: const TextStyle(color: darkTextColor, fontWeight: FontWeight.bold, fontSize: 14)),
         ),
       );
     } else if (type == 'dashed') {
@@ -208,14 +192,7 @@ class _HomeScreenState extends State<HomeScreen> {
           width: size,
           height: size,
           child: Center(
-            child: Text(
-              date,
-              style: const TextStyle(
-                color: darkTextColor,
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-              ),
-            ),
+            child: Text(date, style: const TextStyle(color: darkTextColor, fontWeight: FontWeight.bold, fontSize: 14)),
           ),
         ),
       );
@@ -224,66 +201,101 @@ class _HomeScreenState extends State<HomeScreen> {
         width: size,
         height: size,
         child: Center(
-          child: Text(
-            date,
-            style: const TextStyle(
-              color: darkTextColor,
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-            ),
-          ),
+          child: Text(date, style: const TextStyle(color: darkTextColor, fontWeight: FontWeight.bold, fontSize: 14)),
         ),
       );
     }
   }
 
-  // 3. CYCLE RING WIDGET
+  // 3. CYCLE RING WIDGET (Diperbarui sesuai referensi)
   Widget _buildCycleRingWidget() {
     return Center(
       child: SizedBox(
-        width: 250,
-        height: 250,
+        width: 270,
+        height: 290, // Ditinggikan sedikit untuk mengakomodasi tombol
         child: Stack(
-          alignment: Alignment.center,
+          alignment: Alignment.topCenter,
           children: [
-            CustomPaint(
-              size: const Size(250, 250),
-              painter: MainCycleRingPainter(progress: 0.68),
+            // Layer 1: Cincin Lingkaran
+            SizedBox(
+              width: 260,
+              height: 260,
+              child: CustomPaint(
+                painter: MainCycleRingPainter(progress: 0.65), // 65% siklus
+              ),
             ),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
-                Text(
-                  'Fertile window',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500,
-                    color: darkTextColor,
-                  ),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  '2 days',
-                  style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: darkTextColor,
-                  ),
-                ),
-                SizedBox(height: 4),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 40),
-                  child: Text(
-                    'low chance of getting pregnant',
-                    textAlign: TextAlign.center,
+
+            // Layer 2: Teks di Tengah Lingkaran
+            Positioned(
+              top: 75,
+              child: Column(
+                children: const [
+                  Text(
+                    'Fertile window',
                     style: TextStyle(
-                      fontSize: 13,
-                      color: subTextColor,
-                      height: 1.2,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: darkTextColor,
                     ),
                   ),
+                  SizedBox(height: 4),
+                  Text(
+                    '2 days',
+                    style: TextStyle(
+                      fontSize: 34,
+                      fontWeight: FontWeight.w800,
+                      color: darkTextColor,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  SizedBox(
+                    width: 140,
+                    child: Text(
+                      'low chance of getting pregnant',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: subTextColor,
+                        height: 1.2,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Layer 3: Tombol Log Period menimpa bagian bawah
+            Positioned(
+              bottom: 10,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                decoration: BoxDecoration(
+                  color: darkTextColor, // Menggunakan warna gelap palette
+                  borderRadius: BorderRadius.circular(30),
+                  boxShadow: [
+                    BoxShadow(
+                      color: darkTextColor.withOpacity(0.2),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
-              ],
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: const [
+                    Icon(Icons.add, color: Colors.white, size: 18),
+                    SizedBox(width: 8),
+                    Text(
+                      'Log period',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
         ),
@@ -413,7 +425,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-// CUSTOM PAINTERS (Ring Chart & Dashed Border)
+// -----------------------------------------------------------------------------
+// CUSTOM PAINTERS
+// -----------------------------------------------------------------------------
+
 class MainCycleRingPainter extends CustomPainter {
   final double progress;
 
@@ -421,11 +436,12 @@ class MainCycleRingPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final double strokeWidth = 26.0;
+    // 1. Ketebalan diperbesar agar menyerupai referensi
+    final double strokeWidth = 34.0;
     final Offset center = Offset(size.width / 2, size.height / 2);
     final double radius = (size.width - strokeWidth) / 2;
 
-    // Outer Background (Putih)
+    // 2. Background Track (Lingkaran putih)
     final Paint bgPaint = Paint()
       ..color = Colors.white
       ..style = PaintingStyle.stroke
@@ -433,15 +449,15 @@ class MainCycleRingPainter extends CustomPainter {
 
     canvas.drawCircle(center, radius, bgPaint);
 
-    // Active Progress Arc (Pink)
+    // 3. Active Progress Arc (Pink dengan Rounded Caps)
     final Paint activePaint = Paint()
       ..color = const Color(0xFFED5589)
       ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round
+      ..strokeCap = StrokeCap.round // Ujung membulat
       ..strokeWidth = strokeWidth;
 
-    // Dimulai dari kanan atas (-45 derajat)
-    double startAngle = -math.pi / 3;
+    // Dimulai dari sisi kiri bawah (sekitar 135 derajat / 0.75 pi)
+    double startAngle = math.pi * 0.75;
     double sweepAngle = (2 * math.pi) * progress;
 
     canvas.drawArc(
