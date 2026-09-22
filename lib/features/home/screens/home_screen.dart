@@ -1,5 +1,8 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/app_bottom_nav_bar.dart';
+import '../../../core/navigation/app_navigation.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -9,15 +12,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _selectedIndex = 0;
-
-  // Color palette
-  static const Color primaryPink = Color(0xFFED5589);
-  static const Color primaryPurple = Color(0xFF6C5CE7);
-  static const Color darkTextColor = Color(0xFF2E2A4A);
-  static const Color subTextColor = Color(0xFF8E82A3);
-  static const Color darkerSubTextColor = Color(0xFF6E6A8A);
-
   // Fungsi pop up
   void _showImageBackgroundPopup(BuildContext context) {
     showDialog(
@@ -39,6 +33,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Image.network(
                     'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?q=80&w=600&auto=format&fit=crop',
                     fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(color: const Color(0xFFF3E7FC));
+                    },
                   ),
                 ),
                 // overlay putih semi transparan
@@ -63,7 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: const Center(
                           child: Icon(
                             Icons.favorite_rounded,
-                            color: Color(0xFFED5589),
+                            color: AppColors.primaryPink,
                             size: 30,
                           ),
                         ),
@@ -75,7 +72,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: darkTextColor,
+                          color: AppColors.darkText,
                           letterSpacing: -0.5,
                         ),
                       ),
@@ -85,7 +82,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 13,
-                          color: darkerSubTextColor,
+                          color: AppColors.darkerSubText,
                           height: 1.4,
                         ),
                       ),
@@ -107,7 +104,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
-                                  color: Color(0xFF8E82A3),
+                                  color: AppColors.subText,
                                 ),
                               ),
                             ),
@@ -124,7 +121,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(16),
                                 ),
-                                backgroundColor: primaryPink,
+                                backgroundColor: AppColors.primaryPink,
                               ),
                               child: const Text(
                                 'Catat Sekarang',
@@ -154,52 +151,18 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
-          // gradasi dari kiri ke kanan
-          gradient: LinearGradient(
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
-            colors: [
-              Color(0xFFE2DCF7),
-              Color(0xFFEFE8F9),
-              Color(0xFFF9E9EE),
-            ],
-            stops: [0.0, 0.6, 1.0],
-          ),
+          gradient: AppColors.homeBackgroundGradient,
         ),
         child: SafeArea(
           child: Column(
             children: [
               Expanded(
-                child: SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildHeader(),
-                            const SizedBox(height: 20),
-                            _buildCalendarStrip(),
-                            const SizedBox(height: 36),
-                            _buildCycleRingWidget(),
-                            const SizedBox(height: 32),
-                            _buildSectionHeader('Artikel & Tips Untukmu', () {}),
-                            const SizedBox(height: 14),
-                          ],
-                        ),
-                      ),
-                      // list horzintal artikel dengan foto di sisi kiri
-                      _buildHorizontalArticleList(),
-                      const SizedBox(height: 16),
-                    ],
-                  ),
-                ),
+                child: _buildHomeContent(),
               ),
-              _buildBottomNavigationBar(),
+              AppBottomNavBar(
+                currentTab: AppNavTab.cycle,
+                onTabSelected: (tab) => handleAppNavTap(context, tab),
+              ),
             ],
           ),
         ),
@@ -207,7 +170,38 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // header widget
+  // Konten Utama Halaman Home
+  Widget _buildHomeContent() {
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildHeader(),
+                const SizedBox(height: 20),
+                _buildCalendarStrip(), // Menekan strip ini mengarah ke Halaman Calendar
+                const SizedBox(height: 36),
+                _buildCycleRingWidget(),
+                const SizedBox(height: 32),
+                _buildSectionHeader('Artikel & Tips Untukmu', () {}),
+                const SizedBox(height: 14),
+              ],
+            ),
+          ),
+          _buildHorizontalArticleList(),
+          const SizedBox(height: 16),
+        ],
+      ),
+    );
+  }
+
+  // Header Widget
   Widget _buildHeader() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -223,7 +217,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 style: TextStyle(
                   fontSize: 26,
                   fontWeight: FontWeight.bold,
-                  color: darkTextColor,
+                  color: AppColors.darkText,
                   letterSpacing: -0.5,
                   height: 1.1,
                 ),
@@ -235,7 +229,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                     decoration: BoxDecoration(
-                      color: primaryPink.withOpacity(0.12),
+                      color: AppColors.primaryPink.withOpacity(0.12),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: const Text(
@@ -243,7 +237,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
-                        color: primaryPink,
+                        color: AppColors.primaryPink,
                         height: 1.0,
                       ),
                     ),
@@ -253,7 +247,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     '•',
                     style: TextStyle(
                       fontSize: 12,
-                      color: darkerSubTextColor,
+                      color: AppColors.darkerSubText,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -262,7 +256,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     'Hari ke-8',
                     style: TextStyle(
                       fontSize: 13,
-                      color: darkerSubTextColor,
+                      color: AppColors.darkerSubText,
                       fontWeight: FontWeight.w500,
                       height: 1.0,
                     ),
@@ -284,7 +278,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.03),
+                      color: AppColors.cardShadow,
                       blurRadius: 8,
                       offset: const Offset(0, 3),
                     ),
@@ -292,7 +286,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 child: const Icon(
                   Icons.notifications_none_rounded,
-                  color: darkTextColor,
+                  color: AppColors.darkText,
                   size: 22,
                 ),
               ),
@@ -333,7 +327,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // calendar strip widget
+  // Calendar Strip Widget
   Widget _buildCalendarStrip() {
     final days = [
       {'day': 'SUN', 'date': '22', 'type': 'filled'},
@@ -345,37 +339,42 @@ class _HomeScreenState extends State<HomeScreen> {
       {'day': 'SAT', 'date': '28', 'type': 'dashed'},
     ];
 
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.9),
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 15,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: days.map((item) {
-          return Column(
-            children: [
-              Text(
-                item['day']!,
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: darkTextColor,
+    return GestureDetector(
+      onTap: () {
+        handleAppNavTap(context, AppNavTab.calendar);
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+        decoration: BoxDecoration(
+          color: AppColors.cardBackground,
+          borderRadius: BorderRadius.circular(AppColors.cardRadius),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.cardShadow,
+              blurRadius: 15,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: days.map((item) {
+            return Column(
+              children: [
+                Text(
+                  item['day']!,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.darkText,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 10),
-              _buildDateBadge(item['date']!, item['type']!),
-            ],
-          );
-        }).toList(),
+                const SizedBox(height: 10),
+                _buildDateBadge(item['date']!, item['type']!),
+              ],
+            );
+          }).toList(),
+        ),
       ),
     );
   }
@@ -387,7 +386,7 @@ class _HomeScreenState extends State<HomeScreen> {
         width: size,
         height: size,
         decoration: const BoxDecoration(
-          color: primaryPink,
+          color: AppColors.primaryPink,
           shape: BoxShape.circle,
         ),
         child: Center(
@@ -400,21 +399,21 @@ class _HomeScreenState extends State<HomeScreen> {
         height: size,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          border: Border.all(color: primaryPurple, width: 2),
+          border: Border.all(color: AppColors.primaryPurple, width: 2),
         ),
         child: Center(
-          child: Text(date, style: const TextStyle(color: darkTextColor, fontWeight: FontWeight.bold, fontSize: 14)),
+          child: Text(date, style: const TextStyle(color: AppColors.darkText, fontWeight: FontWeight.bold, fontSize: 14)),
         ),
       );
     } else if (type == 'dashed') {
       return CustomPaint(
         size: const Size(size, size),
-        painter: DashedCirclePainter(color: primaryPurple),
+        painter: DashedCirclePainter(color: AppColors.primaryPurple),
         child: SizedBox(
           width: size,
           height: size,
           child: Center(
-            child: Text(date, style: const TextStyle(color: darkTextColor, fontWeight: FontWeight.bold, fontSize: 14)),
+            child: Text(date, style: const TextStyle(color: AppColors.darkText, fontWeight: FontWeight.bold, fontSize: 14)),
           ),
         ),
       );
@@ -423,13 +422,13 @@ class _HomeScreenState extends State<HomeScreen> {
         width: size,
         height: size,
         child: Center(
-          child: Text(date, style: const TextStyle(color: darkTextColor, fontWeight: FontWeight.bold, fontSize: 14)),
+          child: Text(date, style: const TextStyle(color: AppColors.darkText, fontWeight: FontWeight.bold, fontSize: 14)),
         ),
       );
     }
   }
 
-  // cycle ring widget
+  // Cycle Ring Widget
   Widget _buildCycleRingWidget() {
     return Center(
       child: SizedBox(
@@ -454,7 +453,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
-                      color: darkTextColor,
+                      color: AppColors.darkText,
                     ),
                   ),
                   SizedBox(height: 4),
@@ -463,7 +462,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     style: TextStyle(
                       fontSize: 34,
                       fontWeight: FontWeight.w800,
-                      color: darkTextColor,
+                      color: AppColors.darkText,
                     ),
                   ),
                   SizedBox(height: 4),
@@ -475,7 +474,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
-                        color: darkerSubTextColor,
+                        color: AppColors.darkerSubText,
                         height: 1.2,
                       ),
                     ),
@@ -489,7 +488,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // header yg kecil untuk section artikel
   Widget _buildSectionHeader(String title, VoidCallback onSeeAll) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -499,7 +497,7 @@ class _HomeScreenState extends State<HomeScreen> {
           style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: darkTextColor,
+            color: AppColors.darkText,
           ),
         ),
         GestureDetector(
@@ -509,7 +507,7 @@ class _HomeScreenState extends State<HomeScreen> {
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: primaryPurple,
+              color: AppColors.primaryPurple,
             ),
           ),
         ),
@@ -517,7 +515,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // horizontal scroll artikel
   Widget _buildHorizontalArticleList() {
     final articles = [
       {
@@ -557,11 +554,11 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.92),
-                  borderRadius: BorderRadius.circular(24),
+                  color: AppColors.cardBackground,
+                  borderRadius: BorderRadius.circular(AppColors.cardRadius),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.04),
+                      color: AppColors.cardShadow,
                       blurRadius: 15,
                       offset: const Offset(0, 5),
                     ),
@@ -569,7 +566,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 child: Row(
                   children: [
-                    // foto di sebelah kiri card
                     ClipRRect(
                       borderRadius: BorderRadius.circular(16),
                       child: Image.network(
@@ -577,10 +573,20 @@ class _HomeScreenState extends State<HomeScreen> {
                         width: 95,
                         height: double.infinity,
                         fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            width: 95,
+                            height: double.infinity,
+                            color: Colors.grey[300],
+                            child: const Icon(
+                              Icons.image_not_supported_rounded,
+                              color: AppColors.subText,
+                            ),
+                          );
+                        },
                       ),
                     ),
                     const SizedBox(width: 14),
-                    // konten teks artikel
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -589,7 +595,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                             decoration: BoxDecoration(
-                              color: primaryPink.withOpacity(0.12),
+                              color: AppColors.primaryPink.withOpacity(0.12),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
@@ -597,7 +603,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               style: const TextStyle(
                                 fontSize: 10,
                                 fontWeight: FontWeight.bold,
-                                color: primaryPink,
+                                color: AppColors.primaryPink,
                               ),
                             ),
                           ),
@@ -609,7 +615,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             style: const TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.bold,
-                              color: darkTextColor,
+                              color: AppColors.darkText,
                               height: 1.2,
                             ),
                           ),
@@ -620,7 +626,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
                               fontSize: 11,
-                              color: darkerSubTextColor,
+                              color: AppColors.darkerSubText,
                               fontWeight: FontWeight.w400,
                             ),
                           ),
@@ -636,83 +642,9 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-
-  // bottom navigator
-  Widget _buildBottomNavigationBar() {
-    const Color activeNavColor = Color(0xFF6C5CE7);
-    const Color inactiveNavColor = Color(0xFFB197FC);
-
-    final navItems = [
-      {'icon': Icons.water_drop_outlined, 'activeIcon': Icons.water_drop, 'label': 'Cycle'},
-      {'icon': Icons.calendar_today_outlined, 'activeIcon': Icons.calendar_today_rounded, 'label': 'Calendar'},
-      {'icon': 'custom_moon', 'activeIcon': 'custom_moon', 'label': 'Lunary AI'},
-      {'icon': Icons.menu_book_rounded, 'activeIcon': Icons.menu_book_rounded, 'label': 'Insights'},
-      {'icon': Icons.person_outline_rounded, 'activeIcon': Icons.person_rounded, 'label': 'Profile'},
-    ];
-
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(24),
-          topRight: Radius.circular(24),
-        ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: List.generate(navItems.length, (index) {
-          final isSelected = _selectedIndex == index;
-          final color = isSelected ? activeNavColor : inactiveNavColor;
-
-          return GestureDetector(
-            onTap: () {
-              setState(() {
-                _selectedIndex = index;
-              });
-            },
-            behavior: HitTestBehavior.opaque,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (navItems[index]['label'] == 'Lunary AI')
-                  SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CustomPaint(
-                      painter: LunaryCrescentPainter(
-                        baseColor: color,
-                        crescentColor: const Color(0xFFF3E7FC),
-                      ),
-                    ),
-                  )
-                else
-                  Icon(
-                    isSelected
-                        ? navItems[index]['activeIcon'] as IconData
-                        : navItems[index]['icon'] as IconData,
-                    color: color,
-                    size: 24,
-                  ),
-                const SizedBox(height: 6),
-                Text(
-                  navItems[index]['label'] as String,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                    color: color,
-                  ),
-                ),
-              ],
-            ),
-          );
-        }),
-      ),
-    );
-  }
 }
 
-// widget navigasi tombol
+// Bounce Button Animation
 class BounceButton extends StatefulWidget {
   final Widget child;
   final VoidCallback onTap;
@@ -762,7 +694,7 @@ class _BounceButtonState extends State<BounceButton> with SingleTickerProviderSt
   }
 }
 
-// custom painters
+// Custom Painters
 class MainCycleRingPainter extends CustomPainter {
   final double progress;
 
@@ -782,7 +714,7 @@ class MainCycleRingPainter extends CustomPainter {
     canvas.drawCircle(center, radius, bgPaint);
 
     final Paint activePaint = Paint()
-      ..color = const Color(0xFFED5589)
+      ..color = AppColors.primaryPink
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
       ..strokeWidth = strokeWidth;
@@ -804,7 +736,7 @@ class MainCycleRingPainter extends CustomPainter {
     final Offset dotCenter = Offset(dotX, dotY);
 
     canvas.drawCircle(dotCenter, 14, Paint()..color = Colors.white);
-    canvas.drawCircle(dotCenter, 9, Paint()..color = const Color(0xFFED5589));
+    canvas.drawCircle(dotCenter, 9, Paint()..color = AppColors.primaryPink);
   }
 
   @override
@@ -843,56 +775,4 @@ class DashedCirclePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-// painter bulan sabit
-class LunaryCrescentPainter extends CustomPainter {
-  final Color baseColor;
-  final Color crescentColor;
-
-  LunaryCrescentPainter({
-    required this.baseColor,
-    required this.crescentColor,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final double radius = size.width / 2;
-    final Offset center = Offset(radius, radius);
-
-    final Paint basePaint = Paint()
-      ..color = baseColor
-      ..style = PaintingStyle.fill
-      ..isAntiAlias = true;
-    canvas.drawCircle(center, radius, basePaint);
-
-    final Path outerCrescentCircle = Path()
-      ..addOval(Rect.fromCircle(center: center, radius: radius * 0.72));
-
-    final double cutOffsetX = radius * 0.32;
-    final double cutOffsetY = -radius * 0.10;
-    final Path innerCutCircle = Path()
-      ..addOval(Rect.fromCircle(
-        center: Offset(center.dx + cutOffsetX, center.dy + cutOffsetY),
-        radius: radius * 0.62,
-      ));
-
-    final Path crescentPath = Path.combine(
-      PathOperation.difference,
-      outerCrescentCircle,
-      innerCutCircle,
-    );
-
-    final Paint crescentPaint = Paint()
-      ..color = crescentColor
-      ..style = PaintingStyle.fill
-      ..isAntiAlias = true;
-
-    canvas.drawPath(crescentPath, crescentPaint);
-  }
-
-  @override
-  bool shouldRepaint(covariant LunaryCrescentPainter oldDelegate) =>
-      oldDelegate.baseColor != baseColor ||
-          oldDelegate.crescentColor != crescentColor;
 }
