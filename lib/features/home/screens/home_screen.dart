@@ -11,24 +11,159 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
-  // Color Palette
+  // Color palette
   static const Color primaryPink = Color(0xFFED5589);
   static const Color primaryPurple = Color(0xFF6C5CE7);
-  static const Color darkTextColor = Color(0xFF2E2A4A); // Disesuaikan lebih gelap
+  static const Color darkTextColor = Color(0xFF2E2A4A);
   static const Color subTextColor = Color(0xFF8E82A3);
+  static const Color darkerSubTextColor = Color(0xFF6E6A8A);
+
+  // Fungsi pop up
+  void _showImageBackgroundPopup(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.5),
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(28),
+          ),
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(28),
+            child: Stack(
+              children: [
+                // bg foto
+                Positioned.fill(
+                  child: Image.network(
+                    'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?q=80&w=600&auto=format&fit=crop',
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                // overlay putih semi transparan
+                Positioned.fill(
+                  child: Container(
+                    color: Colors.white.withOpacity(0.88),
+                  ),
+                ),
+                // konten pop up
+                Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 64,
+                        height: 64,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFF3E7FC),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Center(
+                          child: Icon(
+                            Icons.favorite_rounded,
+                            color: Color(0xFFED5589),
+                            size: 30,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      const Text(
+                        'Catat Gejala Hari Ini?',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: darkTextColor,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Mencatat kondisi tubuh secara rutin membantu Lunary AI memberikan prediksi siklus yang lebih akurat.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: darkerSubTextColor,
+                          height: 1.4,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              style: TextButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                backgroundColor: Colors.white.withOpacity(0.8),
+                              ),
+                              child: const Text(
+                                'Nanti Saja',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xFF8E82A3),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                elevation: 0,
+                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                backgroundColor: primaryPink,
+                              ),
+                              child: const Text(
+                                'Catat Sekarang',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
+          // gradasi dari kiri ke kanan
           gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
             colors: [
-              Color(0xFFF3E7FC),
-              Color(0xFFFCEBF3),
+              Color(0xFFE2DCF7),
+              Color(0xFFEFE8F9),
+              Color(0xFFF9E9EE),
             ],
+            stops: [0.0, 0.6, 1.0],
           ),
         ),
         child: SafeArea(
@@ -37,17 +172,28 @@ class _HomeScreenState extends State<HomeScreen> {
               Expanded(
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildHeader(),
-                      const SizedBox(height: 20),
-                      _buildCalendarStrip(),
-                      const SizedBox(height: 36),
-                      _buildCycleRingWidget(), // Bagian ini diperbarui
-                      const SizedBox(height: 36),
-                      _buildArticleCard(),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildHeader(),
+                            const SizedBox(height: 20),
+                            _buildCalendarStrip(),
+                            const SizedBox(height: 36),
+                            _buildCycleRingWidget(),
+                            const SizedBox(height: 32),
+                            _buildSectionHeader('Artikel & Tips Untukmu', () {}),
+                            const SizedBox(height: 14),
+                          ],
+                        ),
+                      ),
+                      // list horzintal artikel dengan foto di sisi kiri
+                      _buildHorizontalArticleList(),
                       const SizedBox(height: 16),
                     ],
                   ),
@@ -61,57 +207,133 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // 1. HEADER WIDGET
+  // header widget
   Widget _buildHeader() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
-            Text(
-              'Hi, Awa',
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                color: darkTextColor,
-                letterSpacing: -0.5,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Hi, Awa',
+                style: TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.bold,
+                  color: darkTextColor,
+                  letterSpacing: -0.5,
+                  height: 1.1,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: primaryPink.withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Text(
+                      'Fase Folikuler',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: primaryPink,
+                        height: 1.0,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const Text(
+                    '•',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: darkerSubTextColor,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const Text(
+                    'Hari ke-8',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: darkerSubTextColor,
+                      fontWeight: FontWeight.w500,
+                      height: 1.0,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        Row(
+          children: [
+            GestureDetector(
+              onTap: () => _showImageBackgroundPopup(context),
+              child: Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.85),
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.03),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.notifications_none_rounded,
+                  color: darkTextColor,
+                  size: 22,
+                ),
               ),
             ),
-            SizedBox(height: 4),
-            Text(
-              'Lorem ipsum dolor sit amet',
-              style: TextStyle(
-                fontSize: 14,
-                color: subTextColor,
+            const SizedBox(width: 10),
+            GestureDetector(
+              onTap: () {},
+              child: Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: const Color(0xFFB197FC),
+                  border: Border.all(
+                    color: Colors.white,
+                    width: 2.5,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFFB197FC).withOpacity(0.35),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: const Center(
+                  child: Icon(
+                    Icons.person_rounded,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                ),
               ),
             ),
           ],
-        ),
-        Container(
-          width: 45,
-          height: 45,
-          decoration: const BoxDecoration(
-            color: Color(0xFFB197FC),
-            shape: BoxShape.circle,
-          ),
-          child: const Center(
-            child: Text(
-              'profil',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
         ),
       ],
     );
   }
 
-  // 2. CALENDAR STRIP WIDGET
+  // calendar strip widget
   Widget _buildCalendarStrip() {
     final days = [
       {'day': 'SUN', 'date': '22', 'type': 'filled'},
@@ -207,25 +429,22 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  // 3. CYCLE RING WIDGET (Diperbarui sesuai referensi)
+  // cycle ring widget
   Widget _buildCycleRingWidget() {
     return Center(
       child: SizedBox(
         width: 270,
-        height: 290, // Ditinggikan sedikit untuk mengakomodasi tombol
+        height: 250,
         child: Stack(
           alignment: Alignment.topCenter,
           children: [
-            // Layer 1: Cincin Lingkaran
             SizedBox(
               width: 260,
               height: 260,
               child: CustomPaint(
-                painter: MainCycleRingPainter(progress: 0.65), // 65% siklus
+                painter: MainCycleRingPainter(progress: 0.65),
               ),
             ),
-
-            // Layer 2: Teks di Tengah Lingkaran
             Positioned(
               top: 75,
               child: Column(
@@ -254,47 +473,14 @@ class _HomeScreenState extends State<HomeScreen> {
                       'low chance of getting pregnant',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 12,
-                        color: subTextColor,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: darkerSubTextColor,
                         height: 1.2,
                       ),
                     ),
                   ),
                 ],
-              ),
-            ),
-
-            // Layer 3: Tombol Log Period menimpa bagian bawah
-            Positioned(
-              bottom: 10,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                decoration: BoxDecoration(
-                  color: darkTextColor, // Menggunakan warna gelap palette
-                  borderRadius: BorderRadius.circular(30),
-                  boxShadow: [
-                    BoxShadow(
-                      color: darkTextColor.withOpacity(0.2),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: const [
-                    Icon(Icons.add, color: Colors.white, size: 18),
-                    SizedBox(width: 8),
-                    Text(
-                      'Log period',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
-                ),
               ),
             ),
           ],
@@ -303,82 +489,169 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // 4. ARTICLE CARD WIDGET
-  Widget _buildArticleCard() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.9),
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 15,
-            offset: const Offset(0, 5),
+  // header yg kecil untuk section artikel
+  Widget _buildSectionHeader(String title, VoidCallback onSeeAll) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: darkTextColor,
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: primaryPink.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Text(
-                  'Tips Kesehatan',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    color: primaryPink,
-                  ),
-                ),
-              ),
-              const Spacer(),
-              const Icon(Icons.bookmark_border, size: 20, color: subTextColor),
-            ],
-          ),
-          const SizedBox(height: 12),
-          const Text(
-            'Cara Menjaga Mood & Energi Saat Memasuki Fase Folikuler',
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
-              color: darkTextColor,
-              height: 1.3,
-            ),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'Pelajari nutrisi dan jenis olahraga ringan yang cocok untuk menjaga staminamu minggu ini.',
+        ),
+        GestureDetector(
+          onTap: onSeeAll,
+          child: const Text(
+            'Lihat Semua',
             style: TextStyle(
               fontSize: 13,
-              color: subTextColor,
-              height: 1.4,
+              fontWeight: FontWeight.w600,
+              color: primaryPurple,
             ),
           ),
-        ],
+        ),
+      ],
+    );
+  }
+
+  // horizontal scroll artikel
+  Widget _buildHorizontalArticleList() {
+    final articles = [
+      {
+        'category': 'Tips Kesehatan',
+        'title': 'Cara Menjaga Mood & Energi Saat Fase Folikuler',
+        'desc': 'Pelajari nutrisi & olahraga ringan yang tepat...',
+        'image': 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=400&auto=format&fit=crop',
+      },
+      {
+        'category': 'Nutrisi',
+        'title': 'Makanan Kaya Zat Besi untuk Stamina Tubuh',
+        'desc': 'Rekomendasi menu sehat harian terbaik...',
+        'image': 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?q=80&w=400&auto=format&fit=crop',
+      },
+      {
+        'category': 'Olahraga',
+        'title': 'Jenis Yoga Ringan Selama Siklus Berjalan',
+        'desc': 'Peregangan aman untuk merilekskan otot...',
+        'image': 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?q=80&w=400&auto=format&fit=crop',
+      },
+    ];
+
+    return SizedBox(
+      height: 135,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        itemCount: articles.length,
+        itemBuilder: (context, index) {
+          final article = articles[index];
+          return Container(
+            width: 310,
+            margin: const EdgeInsets.only(right: 14),
+            child: BounceButton(
+              onTap: () {},
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.92),
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 15,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    // foto di sebelah kiri card
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: Image.network(
+                        article['image'] as String,
+                        width: 95,
+                        height: double.infinity,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    // konten teks artikel
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: primaryPink.withOpacity(0.12),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              article['category'] as String,
+                              style: const TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: primaryPink,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            article['title'] as String,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: darkTextColor,
+                              height: 1.2,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            article['desc'] as String,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: darkerSubTextColor,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
 
-  // 5. BOTTOM NAVIGATION BAR
+  // bottom navigator
   Widget _buildBottomNavigationBar() {
+    const Color activeNavColor = Color(0xFF6C5CE7);
+    const Color inactiveNavColor = Color(0xFFB197FC);
+
     final navItems = [
       {'icon': Icons.water_drop_outlined, 'activeIcon': Icons.water_drop, 'label': 'Cycle'},
-      {'icon': Icons.calendar_today_outlined, 'activeIcon': Icons.calendar_today, 'label': 'Calendar'},
-      {'icon': Icons.nightlight_round_outlined, 'activeIcon': Icons.nightlight_round, 'label': 'Lunary AI'},
-      {'icon': Icons.menu_book_outlined, 'activeIcon': Icons.menu_book, 'label': 'Insights'},
-      {'icon': Icons.person_outline, 'activeIcon': Icons.person, 'label': 'Profile'},
+      {'icon': Icons.calendar_today_outlined, 'activeIcon': Icons.calendar_today_rounded, 'label': 'Calendar'},
+      {'icon': 'custom_moon', 'activeIcon': 'custom_moon', 'label': 'Lunary AI'},
+      {'icon': Icons.menu_book_rounded, 'activeIcon': Icons.menu_book_rounded, 'label': 'Insights'},
+      {'icon': Icons.person_outline_rounded, 'activeIcon': Icons.person_rounded, 'label': 'Profile'},
     ];
 
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 10),
+      padding: const EdgeInsets.symmetric(vertical: 12),
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.only(
@@ -390,6 +663,8 @@ class _HomeScreenState extends State<HomeScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: List.generate(navItems.length, (index) {
           final isSelected = _selectedIndex == index;
+          final color = isSelected ? activeNavColor : inactiveNavColor;
+
           return GestureDetector(
             onTap: () {
               setState(() {
@@ -400,20 +675,32 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
-                  isSelected
-                      ? navItems[index]['activeIcon'] as IconData
-                      : navItems[index]['icon'] as IconData,
-                  color: isSelected ? primaryPurple : subTextColor,
-                  size: 24,
-                ),
-                const SizedBox(height: 4),
+                if (navItems[index]['label'] == 'Lunary AI')
+                  SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CustomPaint(
+                      painter: LunaryCrescentPainter(
+                        baseColor: color,
+                        crescentColor: const Color(0xFFF3E7FC),
+                      ),
+                    ),
+                  )
+                else
+                  Icon(
+                    isSelected
+                        ? navItems[index]['activeIcon'] as IconData
+                        : navItems[index]['icon'] as IconData,
+                    color: color,
+                    size: 24,
+                  ),
+                const SizedBox(height: 6),
                 Text(
                   navItems[index]['label'] as String,
                   style: TextStyle(
                     fontSize: 11,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                    color: isSelected ? primaryPurple : subTextColor,
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                    color: color,
                   ),
                 ),
               ],
@@ -425,10 +712,57 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-// -----------------------------------------------------------------------------
-// CUSTOM PAINTERS
-// -----------------------------------------------------------------------------
+// widget navigasi tombol
+class BounceButton extends StatefulWidget {
+  final Widget child;
+  final VoidCallback onTap;
 
+  const BounceButton({Key? key, required this.child, required this.onTap}) : super(key: key);
+
+  @override
+  State<BounceButton> createState() => _BounceButtonState();
+}
+
+class _BounceButtonState extends State<BounceButton> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 100),
+    );
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => _controller.forward(),
+      onTapUp: (_) {
+        _controller.reverse();
+        widget.onTap();
+      },
+      onTapCancel: () => _controller.reverse(),
+      child: ScaleTransition(
+        scale: _scaleAnimation,
+        child: widget.child,
+      ),
+    );
+  }
+}
+
+// custom painters
 class MainCycleRingPainter extends CustomPainter {
   final double progress;
 
@@ -436,27 +770,23 @@ class MainCycleRingPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // 1. Ketebalan diperbesar agar menyerupai referensi
     final double strokeWidth = 34.0;
     final Offset center = Offset(size.width / 2, size.height / 2);
     final double radius = (size.width - strokeWidth) / 2;
 
-    // 2. Background Track (Lingkaran putih)
     final Paint bgPaint = Paint()
-      ..color = Colors.white
+      ..color = const Color(0xFFEAE1F0)
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth;
 
     canvas.drawCircle(center, radius, bgPaint);
 
-    // 3. Active Progress Arc (Pink dengan Rounded Caps)
     final Paint activePaint = Paint()
       ..color = const Color(0xFFED5589)
       ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round // Ujung membulat
+      ..strokeCap = StrokeCap.round
       ..strokeWidth = strokeWidth;
 
-    // Dimulai dari sisi kiri bawah (sekitar 135 derajat / 0.75 pi)
     double startAngle = math.pi * 0.75;
     double sweepAngle = (2 * math.pi) * progress;
 
@@ -467,6 +797,14 @@ class MainCycleRingPainter extends CustomPainter {
       false,
       activePaint,
     );
+
+    final double endAngle = startAngle + sweepAngle;
+    final double dotX = center.dx + radius * math.cos(endAngle);
+    final double dotY = center.dy + radius * math.sin(endAngle);
+    final Offset dotCenter = Offset(dotX, dotY);
+
+    canvas.drawCircle(dotCenter, 14, Paint()..color = Colors.white);
+    canvas.drawCircle(dotCenter, 9, Paint()..color = const Color(0xFFED5589));
   }
 
   @override
@@ -505,4 +843,56 @@ class DashedCirclePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+// painter bulan sabit
+class LunaryCrescentPainter extends CustomPainter {
+  final Color baseColor;
+  final Color crescentColor;
+
+  LunaryCrescentPainter({
+    required this.baseColor,
+    required this.crescentColor,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final double radius = size.width / 2;
+    final Offset center = Offset(radius, radius);
+
+    final Paint basePaint = Paint()
+      ..color = baseColor
+      ..style = PaintingStyle.fill
+      ..isAntiAlias = true;
+    canvas.drawCircle(center, radius, basePaint);
+
+    final Path outerCrescentCircle = Path()
+      ..addOval(Rect.fromCircle(center: center, radius: radius * 0.72));
+
+    final double cutOffsetX = radius * 0.32;
+    final double cutOffsetY = -radius * 0.10;
+    final Path innerCutCircle = Path()
+      ..addOval(Rect.fromCircle(
+        center: Offset(center.dx + cutOffsetX, center.dy + cutOffsetY),
+        radius: radius * 0.62,
+      ));
+
+    final Path crescentPath = Path.combine(
+      PathOperation.difference,
+      outerCrescentCircle,
+      innerCutCircle,
+    );
+
+    final Paint crescentPaint = Paint()
+      ..color = crescentColor
+      ..style = PaintingStyle.fill
+      ..isAntiAlias = true;
+
+    canvas.drawPath(crescentPath, crescentPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant LunaryCrescentPainter oldDelegate) =>
+      oldDelegate.baseColor != baseColor ||
+          oldDelegate.crescentColor != crescentColor;
 }
