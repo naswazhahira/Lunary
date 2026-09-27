@@ -14,7 +14,7 @@ class AppColors {
   static const Color darkerSubText = Color(0xFF6E6A8A);
 
   // ---- Background gradient (Home, Calendar, etc.) -----------------------
-  static const LinearGradient homeBackgroundGradient = LinearGradient(
+  static const LinearGradient backgroundGradient = LinearGradient(
     begin: Alignment.centerLeft,
     end: Alignment.centerRight,
     colors: [
@@ -29,6 +29,9 @@ class AppColors {
   static Color cardBackground = Colors.white.withOpacity(0.9);
   static Color cardShadow = Colors.black.withOpacity(0.03);
   static const double cardRadius = 24;
+
+  // ---- Cycle ring (Home) -------------------------------------------------
+  static const Color cycleRingTrack = Color(0xFFEAE1F0);
 
   // ---- Calendar specific ----------------------------------------------
   static const Color period = primaryPink;
