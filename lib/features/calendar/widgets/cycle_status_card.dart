@@ -15,16 +15,18 @@ class CycleStatusStat {
 
 class CycleStatusCard extends StatelessWidget {
   final List<CycleStatusStat> stats;
+  final VoidCallback? onSeeMore;
 
   const CycleStatusCard({
     Key? key,
     required this.stats,
+    this.onSeeMore,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: AppColors.cardBackground,
         borderRadius: BorderRadius.circular(AppColors.cardRadius),
@@ -37,79 +39,85 @@ class CycleStatusCard extends StatelessWidget {
         ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          _buildHeader(),
+          const SizedBox(height: 18),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: const [
-              Text(
-                'Cycle Status',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.primaryPurple,
-                ),
-              ),
-              Icon(
-                Icons.chevron_right,
-                color: AppColors.primaryPurple,
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Row(
-            // Menyejajarkan posisi atas lingkaran secara presisi
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: stats.map((stat) => _buildStatItem(stat)).toList(),
+            children: stats.map((stat) => Expanded(child: _buildStatItem(stat))).toList(),
           ),
         ],
       ),
     );
   }
 
+  Widget _buildHeader() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        const Text(
+          'Cycle Status',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: AppColors.primaryPurple,
+          ),
+        ),
+        if (onSeeMore != null)
+          GestureDetector(
+            onTap: onSeeMore,
+            child: const Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.primaryPurple,
+              size: 22,
+            ),
+          ),
+      ],
+    );
+  }
+
   Widget _buildStatItem(CycleStatusStat stat) {
-    return Expanded(
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Lingkaran ikon dengan ukuran fixed
+          // Icon Container
           Container(
-            width: 56,
-            height: 56,
-            decoration: const BoxDecoration(
-              color: AppColors.cycleStatusCircle,
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: AppColors.primaryPurple.withOpacity(0.15),
               shape: BoxShape.circle,
             ),
-            child: Center(
-              child: Icon(
-                stat.icon,
-                color: AppColors.darkText,
-                size: 24,
-              ),
+            child: Icon(
+              stat.icon,
+              color: AppColors.primaryPurple,
+              size: 22,
             ),
           ),
           const SizedBox(height: 10),
-          // Nilai / Value Utama
+          // Nilai Angka / Status Utama
           Text(
             stat.value,
             textAlign: TextAlign.center,
             style: const TextStyle(
-              fontSize: 14,
+              fontSize: 15,
               fontWeight: FontWeight.bold,
-              color: AppColors.darkText,
+              color: AppColors.primaryPurple,
             ),
           ),
           const SizedBox(height: 4),
-          // Label deskripsi (dikecilkan & otomatis ke bawah jika panjang)
+          // Label Penjelas (Bisa terlipat ke bawah jika panjang)
           Text(
             stat.label,
             textAlign: TextAlign.center,
             maxLines: 2,
-            softWrap: true,
+            overflow: TextOverflow.ellipsis,
             style: const TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w400,
+              fontSize: 10.5,
+              fontWeight: FontWeight.w500,
               color: AppColors.darkerSubText,
               height: 1.2,
             ),
