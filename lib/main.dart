@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'features/splash/screens/splash_screen.dart';
+import 'package:provider/provider.dart';
+import 'core/routing/app_router.dart';
+import 'core/providers/cycle_provider.dart';
 
 void main() {
   runApp(const LunaryApp());
@@ -10,16 +12,17 @@ class LunaryApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Lunary',
-      debugShowCheckedModeBanner: false,
-
-      theme: ThemeData(
-        scaffoldBackgroundColor: const Color(0xFFF7F3EE),
-        useMaterial3: true,
+    return ChangeNotifierProvider(
+      create: (_) => CycleProvider(),
+      child: MaterialApp.router(
+        title: 'Lunary',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          scaffoldBackgroundColor: const Color(0xFFF7F3EE),
+          useMaterial3: true,
+        ),
+        routerConfig: appRouter,
       ),
-
-      home: const SplashScreen(),
     );
   }
 }
