@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import 'login_screen.dart';
+import '../../../core/routing/app_navigation.dart';
+import '../../../core/widgets/app_bottom_nav_bar.dart';
+import '../../../core/routing/route_paths.dart';
+import 'package:go_router/go_router.dart';
 
 enum ProfileSubPage { main, editProfile, appSettings, privacySettings, help }
 
@@ -96,17 +100,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Scaffold(
         body: Container(
           decoration: const BoxDecoration(
-            gradient: AppColors.homeBackgroundGradient,
+            gradient: AppColors.backgroundGradient,
           ),
           child: SafeArea(
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 250),
-              child: _buildCurrentSubPage(),
+            child: Column(
+              children: [
+                Expanded(
+                  child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 250),
+                  child: _buildCurrentSubPage(),
+                  ),
+                ),
+                if (_currentPage == ProfileSubPage.main)
+                  AppBottomNavBar(
+                    currentTab: AppNavTab.profile,
+                    onTabSelected: (tab) {
+                      if (tab == AppNavTab.profile) return;
+                      handleAppNavTap(context, tab);
+                    },
+                  ),
+                ],
+              )
             ),
           ),
         ),
-      ),
-    );
+      );
   }
 
   Widget _buildCurrentSubPage() {
