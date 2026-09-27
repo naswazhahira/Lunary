@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
-import '../theme/app_colors.dart';
 
 class AppProfileAvatar extends StatelessWidget {
   final double size;
   final VoidCallback? onTap;
 
-  const AppProfileAvatar({Key? key, this.size = 45, this.onTap})
-      : super(key: key);
+  const AppProfileAvatar({
+    Key? key,
+    this.size = 44,
+    this.onTap,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -15,18 +17,26 @@ class AppProfileAvatar extends StatelessWidget {
       child: Container(
         width: size,
         height: size,
-        decoration: const BoxDecoration(
-          color: Color(0xFFB197FC),
+        decoration: BoxDecoration(
           shape: BoxShape.circle,
+          color: const Color(0xFFB197FC),
+          border: Border.all(
+            color: Colors.white,
+            width: 2.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFFB197FC).withOpacity(0.35),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: const Center(
-          child: Text(
-            'profil',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-            ),
+          child: Icon(
+            Icons.person_rounded,
+            color: Colors.white,
+            size: 24,
           ),
         ),
       ),
