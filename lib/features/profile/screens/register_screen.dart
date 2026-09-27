@@ -38,7 +38,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
-          gradient: AppColors.homeBackgroundGradient,
+          gradient: AppColors.backgroundGradient,
         ),
         child: SafeArea(
           child: Column(
