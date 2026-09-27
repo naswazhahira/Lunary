@@ -1,50 +1,38 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/app_bottom_nav_bar.dart';
-import '../../../core/navigation/app_navigation.dart';
+import '../../../core/widgets/app_profile_avatar.dart';
+import '../../../core/widgets/app_notification_button.dart';
+import '../../../core/widgets/bounce_button.dart';
+import '../../../core/painters/dashed_circle_painter.dart';
+import '../../../core/routing/app_navigation.dart';
+import '../../../core/providers/cycle_provider.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  // Fungsi pop up
   void _showImageBackgroundPopup(BuildContext context) {
     showDialog(
       context: context,
       barrierColor: Colors.black.withOpacity(0.5),
       builder: (BuildContext context) {
         return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(28),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
           elevation: 0,
           backgroundColor: Colors.transparent,
           child: ClipRRect(
             borderRadius: BorderRadius.circular(28),
             child: Stack(
               children: [
-                // bg foto
                 Positioned.fill(
                   child: Image.network(
                     'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?q=80&w=600&auto=format&fit=crop',
                     fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(color: const Color(0xFFF3E7FC));
-                    },
                   ),
                 ),
-                // overlay putih semi transparan
-                Positioned.fill(
-                  child: Container(
-                    color: Colors.white.withOpacity(0.88),
-                  ),
-                ),
-                // konten pop up
+                Positioned.fill(child: Container(color: Colors.white.withOpacity(0.88))),
                 Padding(
                   padding: const EdgeInsets.all(24),
                   child: Column(
@@ -53,38 +41,20 @@ class _HomeScreenState extends State<HomeScreen> {
                       Container(
                         width: 64,
                         height: 64,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFFF3E7FC),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Center(
-                          child: Icon(
-                            Icons.favorite_rounded,
-                            color: AppColors.primaryPink,
-                            size: 30,
-                          ),
-                        ),
+                        decoration: const BoxDecoration(color: Color(0xFFF3E7FC), shape: BoxShape.circle),
+                        child: const Center(child: Icon(Icons.favorite_rounded, color: AppColors.primaryPink, size: 30)),
                       ),
                       const SizedBox(height: 20),
                       const Text(
                         'Catat Gejala Hari Ini?',
                         textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.darkText,
-                          letterSpacing: -0.5,
-                        ),
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.darkText, letterSpacing: -0.5),
                       ),
                       const SizedBox(height: 8),
                       const Text(
                         'Mencatat kondisi tubuh secara rutin membantu Lunary AI memberikan prediksi siklus yang lebih akurat.',
                         textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: AppColors.darkerSubText,
-                          height: 1.4,
-                        ),
+                        style: TextStyle(fontSize: 13, color: AppColors.darkerSubText, height: 1.4),
                       ),
                       const SizedBox(height: 24),
                       Row(
@@ -94,43 +64,26 @@ class _HomeScreenState extends State<HomeScreen> {
                               onPressed: () => Navigator.pop(context),
                               style: TextButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(vertical: 14),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                                 backgroundColor: Colors.white.withOpacity(0.8),
                               ),
-                              child: const Text(
-                                'Nanti Saja',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.subText,
-                                ),
-                              ),
+                              child: const Text('Nanti Saja', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.subText)),
                             ),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
                             child: ElevatedButton(
                               onPressed: () {
+                                context.read<CycleProvider>().logPeriodToday();
                                 Navigator.pop(context);
                               },
                               style: ElevatedButton.styleFrom(
                                 elevation: 0,
                                 padding: const EdgeInsets.symmetric(vertical: 14),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                                 backgroundColor: AppColors.primaryPink,
                               ),
-                              child: const Text(
-                                'Catat Sekarang',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
+                              child: const Text('Catat Sekarang', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white)),
                             ),
                           ),
                         ],
@@ -148,16 +101,42 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final cycle = context.watch<CycleProvider>();
+
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: AppColors.homeBackgroundGradient,
-        ),
+        decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
         child: SafeArea(
           child: Column(
             children: [
               Expanded(
-                child: _buildHomeContent(),
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildHeader(context, cycle),
+                            const SizedBox(height: 20),
+                            _buildCalendarStrip(),
+                            const SizedBox(height: 36),
+                            _buildCycleRingWidget(),
+                            const SizedBox(height: 32),
+                            _buildSectionHeader('Artikel & Tips Untukmu', () {}),
+                            const SizedBox(height: 14),
+                          ],
+                        ),
+                      ),
+                      _buildHorizontalArticleList(),
+                      const SizedBox(height: 16),
+                    ],
+                  ),
+                ),
               ),
               AppBottomNavBar(
                 currentTab: AppNavTab.cycle,
@@ -170,39 +149,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // Konten Utama Halaman Home
-  Widget _buildHomeContent() {
-    return SingleChildScrollView(
-      physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildHeader(),
-                const SizedBox(height: 20),
-                _buildCalendarStrip(), // Menekan strip ini mengarah ke Halaman Calendar
-                const SizedBox(height: 36),
-                _buildCycleRingWidget(),
-                const SizedBox(height: 32),
-                _buildSectionHeader('Artikel & Tips Untukmu', () {}),
-                const SizedBox(height: 14),
-              ],
-            ),
-          ),
-          _buildHorizontalArticleList(),
-          const SizedBox(height: 16),
-        ],
-      ),
-    );
-  }
-
-  // Header Widget
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context, CycleProvider cycle) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -212,55 +159,20 @@ class _HomeScreenState extends State<HomeScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
-                'Hi, Awa',
-                style: TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.darkText,
-                  letterSpacing: -0.5,
-                  height: 1.1,
-                ),
-              ),
+              const Text('Hi, Awa', style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: AppColors.darkText, letterSpacing: -0.5, height: 1.1)),
               const SizedBox(height: 8),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryPink.withOpacity(0.12),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: const Text(
-                      'Fase Folikuler',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.primaryPink,
-                        height: 1.0,
-                      ),
-                    ),
+                    decoration: BoxDecoration(color: AppColors.primaryPink.withOpacity(0.12), borderRadius: BorderRadius.circular(10)),
+                    child: Text(cycle.currentPhaseLabel, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primaryPink, height: 1.0)),
                   ),
                   const SizedBox(width: 8),
-                  const Text(
-                    '•',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: AppColors.darkerSubText,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  const Text('•', style: TextStyle(fontSize: 12, color: AppColors.darkerSubText, fontWeight: FontWeight.bold)),
                   const SizedBox(width: 8),
-                  const Text(
-                    'Hari ke-8',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: AppColors.darkerSubText,
-                      fontWeight: FontWeight.w500,
-                      height: 1.0,
-                    ),
-                  ),
+                  Text('Hari ke-${cycle.currentCycleDay}', style: const TextStyle(fontSize: 13, color: AppColors.darkerSubText, fontWeight: FontWeight.w500, height: 1.0)),
                 ],
               ),
             ],
@@ -268,66 +180,15 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         Row(
           children: [
-            GestureDetector(
-              onTap: () => _showImageBackgroundPopup(context),
-              child: Container(
-                width: 42,
-                height: 42,
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.85),
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.cardShadow,
-                      blurRadius: 8,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: const Icon(
-                  Icons.notifications_none_rounded,
-                  color: AppColors.darkText,
-                  size: 22,
-                ),
-              ),
-            ),
+            AppNotificationButton(onTap: () => _showImageBackgroundPopup(context)),
             const SizedBox(width: 10),
-            GestureDetector(
-              onTap: () {},
-              child: Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: const Color(0xFFB197FC),
-                  border: Border.all(
-                    color: Colors.white,
-                    width: 2.5,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFFB197FC).withOpacity(0.35),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: const Center(
-                  child: Icon(
-                    Icons.person_rounded,
-                    color: Colors.white,
-                    size: 24,
-                  ),
-                ),
-              ),
-            ),
+            AppProfileAvatar(onTap: () => handleAppNavTap(context, AppNavTab.profile)),
           ],
         ),
       ],
     );
   }
 
-  // Calendar Strip Widget
   Widget _buildCalendarStrip() {
     final days = [
       {'day': 'SUN', 'date': '22', 'type': 'filled'},
@@ -339,42 +200,24 @@ class _HomeScreenState extends State<HomeScreen> {
       {'day': 'SAT', 'date': '28', 'type': 'dashed'},
     ];
 
-    return GestureDetector(
-      onTap: () {
-        handleAppNavTap(context, AppNavTab.calendar);
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-        decoration: BoxDecoration(
-          color: AppColors.cardBackground,
-          borderRadius: BorderRadius.circular(AppColors.cardRadius),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.cardShadow,
-              blurRadius: 15,
-              offset: const Offset(0, 5),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: days.map((item) {
-            return Column(
-              children: [
-                Text(
-                  item['day']!,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.darkText,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                _buildDateBadge(item['date']!, item['type']!),
-              ],
-            );
-          }).toList(),
-        ),
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+      decoration: BoxDecoration(
+        color: AppColors.cardBackground,
+        borderRadius: BorderRadius.circular(AppColors.cardRadius),
+        boxShadow: [BoxShadow(color: AppColors.cardShadow, blurRadius: 15, offset: const Offset(0, 5))],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: days.map((item) {
+          return Column(
+            children: [
+              Text(item['day']!, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.darkText)),
+              const SizedBox(height: 10),
+              _buildDateBadge(item['date']!, item['type']!),
+            ],
+          );
+        }).toList(),
       ),
     );
   }
@@ -385,50 +228,35 @@ class _HomeScreenState extends State<HomeScreen> {
       return Container(
         width: size,
         height: size,
-        decoration: const BoxDecoration(
-          color: AppColors.primaryPink,
-          shape: BoxShape.circle,
-        ),
-        child: Center(
-          child: Text(date, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
-        ),
+        decoration: const BoxDecoration(color: AppColors.primaryPink, shape: BoxShape.circle),
+        child: Center(child: Text(date, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14))),
       );
     } else if (type == 'outlined') {
       return Container(
         width: size,
         height: size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(color: AppColors.primaryPurple, width: 2),
-        ),
-        child: Center(
-          child: Text(date, style: const TextStyle(color: AppColors.darkText, fontWeight: FontWeight.bold, fontSize: 14)),
-        ),
+        decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: AppColors.primaryPurple, width: 2)),
+        child: Center(child: Text(date, style: const TextStyle(color: AppColors.darkText, fontWeight: FontWeight.bold, fontSize: 14))),
       );
     } else if (type == 'dashed') {
       return CustomPaint(
         size: const Size(size, size),
-        painter: DashedCirclePainter(color: AppColors.primaryPurple),
+        painter: const DashedCirclePainter(color: AppColors.primaryPurple),
         child: SizedBox(
           width: size,
           height: size,
-          child: Center(
-            child: Text(date, style: const TextStyle(color: AppColors.darkText, fontWeight: FontWeight.bold, fontSize: 14)),
-          ),
+          child: Center(child: Text(date, style: const TextStyle(color: AppColors.darkText, fontWeight: FontWeight.bold, fontSize: 14))),
         ),
       );
     } else {
       return SizedBox(
         width: size,
         height: size,
-        child: Center(
-          child: Text(date, style: const TextStyle(color: AppColors.darkText, fontWeight: FontWeight.bold, fontSize: 14)),
-        ),
+        child: Center(child: Text(date, style: const TextStyle(color: AppColors.darkText, fontWeight: FontWeight.bold, fontSize: 14))),
       );
     }
   }
 
-  // Cycle Ring Widget
   Widget _buildCycleRingWidget() {
     return Center(
       child: SizedBox(
@@ -437,46 +265,21 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Stack(
           alignment: Alignment.topCenter,
           children: [
-            SizedBox(
-              width: 260,
-              height: 260,
-              child: CustomPaint(
-                painter: MainCycleRingPainter(progress: 0.65),
-              ),
-            ),
+            SizedBox(width: 260, height: 260, child: CustomPaint(painter: MainCycleRingPainter(progress: 0.65))),
             Positioned(
               top: 75,
               child: Column(
                 children: const [
-                  Text(
-                    'Fertile window',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.darkText,
-                    ),
-                  ),
+                  Text('Fertile window', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppColors.darkText)),
                   SizedBox(height: 4),
-                  Text(
-                    '2 days',
-                    style: TextStyle(
-                      fontSize: 34,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.darkText,
-                    ),
-                  ),
+                  Text('2 days', style: TextStyle(fontSize: 34, fontWeight: FontWeight.w800, color: AppColors.darkText)),
                   SizedBox(height: 4),
                   SizedBox(
                     width: 140,
                     child: Text(
                       'low chance of getting pregnant',
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.darkerSubText,
-                        height: 1.2,
-                      ),
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.darkerSubText, height: 1.2),
                     ),
                   ),
                 ],
@@ -492,24 +295,10 @@ class _HomeScreenState extends State<HomeScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          title,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: AppColors.darkText,
-          ),
-        ),
+        Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.darkText)),
         GestureDetector(
           onTap: onSeeAll,
-          child: const Text(
-            'Lihat Semua',
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: AppColors.primaryPurple,
-            ),
-          ),
+          child: const Text('Lihat Semua', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.primaryPurple)),
         ),
       ],
     );
@@ -554,37 +343,15 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: AppColors.cardBackground,
-                  borderRadius: BorderRadius.circular(AppColors.cardRadius),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.cardShadow,
-                      blurRadius: 15,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
+                  color: Colors.white.withOpacity(0.92),
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 15, offset: const Offset(0, 5))],
                 ),
                 child: Row(
                   children: [
                     ClipRRect(
                       borderRadius: BorderRadius.circular(16),
-                      child: Image.network(
-                        article['image'] as String,
-                        width: 95,
-                        height: double.infinity,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            width: 95,
-                            height: double.infinity,
-                            color: Colors.grey[300],
-                            child: const Icon(
-                              Icons.image_not_supported_rounded,
-                              color: AppColors.subText,
-                            ),
-                          );
-                        },
-                      ),
+                      child: Image.network(article['image'] as String, width: 95, height: double.infinity, fit: BoxFit.cover),
                     ),
                     const SizedBox(width: 14),
                     Expanded(
@@ -594,41 +361,22 @@ class _HomeScreenState extends State<HomeScreen> {
                         children: [
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                            decoration: BoxDecoration(
-                              color: AppColors.primaryPink.withOpacity(0.12),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              article['category'] as String,
-                              style: const TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.primaryPink,
-                              ),
-                            ),
+                            decoration: BoxDecoration(color: AppColors.primaryPink.withOpacity(0.12), borderRadius: BorderRadius.circular(8)),
+                            child: Text(article['category'] as String, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.primaryPink)),
                           ),
                           const SizedBox(height: 6),
                           Text(
                             article['title'] as String,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.darkText,
-                              height: 1.2,
-                            ),
+                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.darkText, height: 1.2),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             article['desc'] as String,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 11,
-                              color: AppColors.darkerSubText,
-                              fontWeight: FontWeight.w400,
-                            ),
+                            style: const TextStyle(fontSize: 11, color: AppColors.darkerSubText, fontWeight: FontWeight.w400),
                           ),
                         ],
                       ),
@@ -644,60 +392,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-// Bounce Button Animation
-class BounceButton extends StatefulWidget {
-  final Widget child;
-  final VoidCallback onTap;
-
-  const BounceButton({Key? key, required this.child, required this.onTap}) : super(key: key);
-
-  @override
-  State<BounceButton> createState() => _BounceButtonState();
-}
-
-class _BounceButtonState extends State<BounceButton> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 100),
-    );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (_) => _controller.forward(),
-      onTapUp: (_) {
-        _controller.reverse();
-        widget.onTap();
-      },
-      onTapCancel: () => _controller.reverse(),
-      child: ScaleTransition(
-        scale: _scaleAnimation,
-        child: widget.child,
-      ),
-    );
-  }
-}
-
-// Custom Painters
 class MainCycleRingPainter extends CustomPainter {
   final double progress;
-
   MainCycleRingPainter({required this.progress});
 
   @override
@@ -707,10 +403,9 @@ class MainCycleRingPainter extends CustomPainter {
     final double radius = (size.width - strokeWidth) / 2;
 
     final Paint bgPaint = Paint()
-      ..color = const Color(0xFFEAE1F0)
+      ..color = AppColors.cycleRingTrack
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth;
-
     canvas.drawCircle(center, radius, bgPaint);
 
     final Paint activePaint = Paint()
@@ -722,13 +417,7 @@ class MainCycleRingPainter extends CustomPainter {
     double startAngle = math.pi * 0.75;
     double sweepAngle = (2 * math.pi) * progress;
 
-    canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius),
-      startAngle,
-      sweepAngle,
-      false,
-      activePaint,
-    );
+    canvas.drawArc(Rect.fromCircle(center: center, radius: radius), startAngle, sweepAngle, false, activePaint);
 
     final double endAngle = startAngle + sweepAngle;
     final double dotX = center.dx + radius * math.cos(endAngle);
@@ -741,38 +430,4 @@ class MainCycleRingPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
-}
-
-class DashedCirclePainter extends CustomPainter {
-  final Color color;
-
-  DashedCirclePainter({required this.color});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final Paint paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5;
-
-    final double radius = size.width / 2;
-    final Offset center = Offset(radius, radius);
-    const int dashCount = 14;
-    const double dashAngle = (2 * math.pi) / dashCount;
-
-    for (int i = 0; i < dashCount; i++) {
-      if (i % 2 == 0) {
-        canvas.drawArc(
-          Rect.fromCircle(center: center, radius: radius - 1),
-          i * dashAngle,
-          dashAngle,
-          false,
-          paint,
-        );
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
