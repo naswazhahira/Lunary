@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
-import '../navigation/app_navigation.dart';
+import '../routing/app_navigation.dart';
 
 class AppBottomNavBar extends StatelessWidget {
   final AppNavTab currentTab;
