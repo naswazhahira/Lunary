@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../features/home/screens/home_screen.dart';
 import '../../features/calendar/screens/calendar_screen.dart';
+import '../../features/insights/screens/insights_screen.dart';
 import '../../features/profile/screens/profile_screen.dart';
+import '../../features/profile/screens/login_screen.dart';
 
 enum AppNavTab {
   cycle,
@@ -11,8 +13,9 @@ enum AppNavTab {
   profile,
 }
 
-// Simulasi status auth
+// Status Auth Global
 bool isUserLoggedIn = false;
+Map<String, String>? globalUserData;
 
 void handleAppNavTap(BuildContext context, AppNavTab tab) {
   switch (tab) {
@@ -28,19 +31,29 @@ void handleAppNavTap(BuildContext context, AppNavTab tab) {
       );
       break;
 
+    case AppNavTab.insights:
+      checkAuthAndExecute(context, onSuccess: () {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const InsightsScreen()),
+        );
+      });
+      break;
+
     case AppNavTab.profile:
-    // Menggunakan pushReplacement jika ProfileScreen memiliki AppBottomNavBar,
-    // atau push jika ProfileScreen adalah sub-layar terpisah.
       Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => const ProfileScreen()),
+        MaterialPageRoute(
+          builder: (_) => ProfileScreen(userData: globalUserData),
+        ),
       );
       break;
 
     case AppNavTab.lunaryAi:
-    case AppNavTab.insights:
       checkAuthAndExecute(context, onSuccess: () {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Feature coming soon!')),
+          const SnackBar(
+            content: Text('Feature coming soon!'),
+            behavior: SnackBarBehavior.floating,
+          ),
         );
       });
       break;
@@ -60,34 +73,58 @@ void checkAuthAndExecute(BuildContext context, {required VoidCallback onSuccess}
 void showLoginRequiredDialog(BuildContext context) {
   showDialog(
     context: context,
-    builder: (context) => AlertDialog(
+    builder: (dialogContext) => AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       title: const Text(
-        'Login Required',
+        'Akses Terbatas',
         style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
       ),
       content: const Text(
-        'This feature requires an account so your data can be safely backed up to the cloud.',
+        'Fitur ini membutuhkan akun agar data kesehatan Anda dapat tersimpan dengan aman di cloud.',
         style: TextStyle(fontSize: 13, height: 1.4),
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Not Now', style: TextStyle(color: Colors.grey)),
+          onPressed: () => Navigator.pop(dialogContext),
+          child: const Text('Nanti Saja', style: TextStyle(color: Colors.grey)),
         ),
         ElevatedButton(
-          onPressed: () {
-            Navigator.pop(context);
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Navigating to Login Screen')),
+          onPressed: () async {
+            Navigator.pop(dialogContext); // Tutup dialog terlebih dahulu
+
+            // Buka LoginScreen dan tunggu hasil login
+            final result = await Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const LoginScreen()),
             );
+
+            // Jika user berhasil login
+            if (result != null && result is Map<String, dynamic>) {
+              isUserLoggedIn = true;
+              globalUserData = {
+                'name': result['name'] ?? 'Pengguna Lunary',
+                'email': result['email'] ?? 'user@lunary.com',
+              };
+
+              // Buka halaman Profile untuk menampilkan status login terbaru
+              if (context.mounted) {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => ProfileScreen(userData: globalUserData),
+                  ),
+                );
+              }
+            }
           },
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFFB197FC),
+            backgroundColor: const Color(0xFF7C3AED),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             elevation: 0,
           ),
-          child: const Text('Login / Register', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          child: const Text(
+            'Login / Register',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
         ),
       ],
     ),
