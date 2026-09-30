@@ -3,6 +3,7 @@ import '../../features/splash/screens/splash_screen.dart';
 import '../../features/home/screens/home_screen.dart';
 import '../../features/calendar/screens/calendar_screen.dart';
 import '../../features/calendar/screens/cycle_detail_screen.dart';
+import '../../features/insights/screens/insights_screen.dart';
 import '../../features/profile/screens/profile_screen.dart';
 import 'route_paths.dart';
 
@@ -20,6 +21,10 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: RoutePaths.calendar,
       builder: (context, state) => const CalendarScreen(),
+    ),
+    GoRoute(
+      path: RoutePaths.insights,
+      builder: (context, state) => const InsightsScreen(),
     ),
     GoRoute(
       path: RoutePaths.cycleDetail,
