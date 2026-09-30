@@ -3,8 +3,6 @@ import '../../../core/theme/app_colors.dart';
 import 'login_screen.dart';
 import '../../../core/routing/app_navigation.dart';
 import '../../../core/widgets/app_bottom_nav_bar.dart';
-import '../../../core/routing/route_paths.dart';
-import 'package:go_router/go_router.dart';
 
 enum ProfileSubPage { main, editProfile, appSettings, privacySettings, help }
 
@@ -26,7 +24,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   late TextEditingController _dobController;
   late TextEditingController _heightController;
   late TextEditingController _weightController;
-  String? _selectedGender; // Null secara default agar kosong
+  String? _selectedGender;
 
   bool _isMetricSystem = true;
   String _selectedLanguage = 'Bahasa Indonesia';
@@ -58,7 +56,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _nameController = TextEditingController(text: widget.userData?['name'] ?? 'Pengguna Lunary');
     _emailController = TextEditingController(text: widget.userData?['email'] ?? 'user@lunary.com');
 
-    // Inisialisasi controller dalam keadaan kosong
     _dobController = TextEditingController();
     _heightController = TextEditingController();
     _weightController = TextEditingController();
@@ -107,8 +104,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               children: [
                 Expanded(
                   child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 250),
-                  child: _buildCurrentSubPage(),
+                    duration: const Duration(milliseconds: 250),
+                    child: _buildCurrentSubPage(),
                   ),
                 ),
                 if (_currentPage == ProfileSubPage.main)
@@ -119,12 +116,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       handleAppNavTap(context, tab);
                     },
                   ),
-                ],
-              )
+              ],
             ),
           ),
         ),
-      );
+      ),
+    );
   }
 
   Widget _buildCurrentSubPage() {
@@ -173,15 +170,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ],
         ),
         const SizedBox(height: 20),
-
         _buildProfileHeaderCard(),
         const SizedBox(height: 16),
-
         Container(
           decoration: BoxDecoration(
             color: AppColors.cardBackground,
             borderRadius: BorderRadius.circular(AppColors.cardRadius),
-            boxShadow: [BoxShadow(color: AppColors.cardShadow, blurRadius: 15, offset: const Offset(0, 5))],
+            boxShadow: [
+              BoxShadow(color: AppColors.cardShadow, blurRadius: 15, offset: const Offset(0, 5)),
+            ],
           ),
           child: Column(
             children: [
@@ -225,13 +222,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
         const SizedBox(height: 16),
-
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: AppColors.cardBackground,
             borderRadius: BorderRadius.circular(AppColors.cardRadius),
-            boxShadow: [BoxShadow(color: AppColors.cardShadow, blurRadius: 15, offset: const Offset(0, 5))],
+            boxShadow: [
+              BoxShadow(color: AppColors.cardShadow, blurRadius: 15, offset: const Offset(0, 5)),
+            ],
           ),
           child: Column(
             children: [
@@ -273,7 +271,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
         const SizedBox(height: 24),
-
         const Center(
           child: Column(
             children: [
@@ -296,7 +293,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       decoration: BoxDecoration(
         color: AppColors.cardBackground,
         borderRadius: BorderRadius.circular(AppColors.cardRadius),
-        boxShadow: [BoxShadow(color: AppColors.cardShadow, blurRadius: 15, offset: const Offset(0, 5))],
+        boxShadow: [
+          BoxShadow(color: AppColors.cardShadow, blurRadius: 15, offset: const Offset(0, 5)),
+        ],
       ),
       child: _isLoggedIn ? _buildLoggedInProfileContent() : _buildGuestProfileContent(),
     );
@@ -398,11 +397,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 MaterialPageRoute(builder: (context) => const LoginScreen()),
               );
 
-              if (result != null && result is Map<String, String>) {
+              if (result != null && result is Map<String, dynamic>) {
+                isUserLoggedIn = true;
+                globalUserData = {
+                  'name': result['name'] ?? 'Pengguna Lunary',
+                  'email': result['email'] ?? 'user@lunary.com',
+                };
                 setState(() {
                   _isLoggedIn = true;
-                  _nameController.text = result['name'] ?? 'Pengguna';
-                  _emailController.text = result['email'] ?? '';
+                  _nameController.text = globalUserData!['name']!;
+                  _emailController.text = globalUserData!['email']!;
                 });
               }
             },
@@ -647,7 +651,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ]),
               const SizedBox(height: 20),
-
               _buildSectionTitle('Privasi Saya'),
               _buildCardContainer([
                 _buildListTile(
@@ -665,7 +668,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ]),
               const SizedBox(height: 20),
-
               _buildSectionTitle('Keamanan'),
               _buildCardContainer([
                 _buildListTile(
@@ -676,7 +678,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ]),
               const SizedBox(height: 20),
-
               _buildCardContainer([
                 _buildListTile(
                   icon: Icons.delete_outline,
@@ -728,7 +729,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
               const SizedBox(height: 20),
-
               ..._faqs.map((category) {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -947,10 +947,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.pop(context); // Tutup Dialog
+
+              // Reset status login global & lokal
+              isUserLoggedIn = false;
+              globalUserData = null;
+
               setState(() {
                 _isLoggedIn = false;
+                _currentPage = ProfileSubPage.main; // Kembali otomatis ke tampilan Profile Utama (Guest)
               });
+
               _showSnackBar('Akun berhasil dihapus.');
             },
             child: const Text('Hapus', style: TextStyle(color: Colors.white)),
