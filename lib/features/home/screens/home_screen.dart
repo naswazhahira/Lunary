@@ -6,9 +6,11 @@ import '../../../core/widgets/app_bottom_nav_bar.dart';
 import '../../../core/widgets/app_profile_avatar.dart';
 import '../../../core/widgets/app_notification_button.dart';
 import '../../../core/widgets/bounce_button.dart';
-import '../../../core/painters/dashed_circle_painter.dart';
 import '../../../core/routing/app_navigation.dart';
 import '../../../core/providers/cycle_provider.dart';
+import '../widgets/weekly_calendar.dart';
+import '../../insights/models/article_model.dart';
+import '../../insights/screens/article_detail_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -46,13 +48,13 @@ class HomeScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 20),
                       const Text(
-                        'Catat Gejala Hari Ini?',
+                        'Log Your Symptoms Today?',
                         textAlign: TextAlign.center,
                         style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.darkText, letterSpacing: -0.5),
                       ),
                       const SizedBox(height: 8),
                       const Text(
-                        'Mencatat kondisi tubuh secara rutin membantu Lunary AI memberikan prediksi siklus yang lebih akurat.',
+                        'Logging how your body feels regularly helps Lunary AI give you more accurate cycle predictions.',
                         textAlign: TextAlign.center,
                         style: TextStyle(fontSize: 13, color: AppColors.darkerSubText, height: 1.4),
                       ),
@@ -67,7 +69,7 @@ class HomeScreen extends StatelessWidget {
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                                 backgroundColor: Colors.white.withOpacity(0.8),
                               ),
-                              child: const Text('Nanti Saja', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.subText)),
+                              child: const Text('Maybe Later', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.subText)),
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -83,7 +85,7 @@ class HomeScreen extends StatelessWidget {
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                                 backgroundColor: AppColors.primaryPink,
                               ),
-                              child: const Text('Catat Sekarang', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white)),
+                              child: const Text('Log Now', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white)),
                             ),
                           ),
                         ],
@@ -123,16 +125,19 @@ class HomeScreen extends StatelessWidget {
                           children: [
                             _buildHeader(context, cycle),
                             const SizedBox(height: 20),
-                            _buildCalendarStrip(),
+                            const WeeklyCalendar(),
                             const SizedBox(height: 36),
-                            _buildCycleRingWidget(),
+                            _buildCycleRingWidget(cycle),
                             const SizedBox(height: 32),
-                            _buildSectionHeader('Artikel & Tips Untukmu', () {}),
+                            _buildSectionHeader(
+                              'Articles & Tips for You',
+                                  () => handleAppNavTap(context, AppNavTab.insights),
+                            ),
                             const SizedBox(height: 14),
                           ],
                         ),
                       ),
-                      _buildHorizontalArticleList(),
+                      _buildHorizontalArticleList(context),
                       const SizedBox(height: 16),
                     ],
                   ),
@@ -172,7 +177,7 @@ class HomeScreen extends StatelessWidget {
                   const SizedBox(width: 8),
                   const Text('•', style: TextStyle(fontSize: 12, color: AppColors.darkerSubText, fontWeight: FontWeight.bold)),
                   const SizedBox(width: 8),
-                  Text('Hari ke-${cycle.currentCycleDay}', style: const TextStyle(fontSize: 13, color: AppColors.darkerSubText, fontWeight: FontWeight.w500, height: 1.0)),
+                  Text('Day ${cycle.currentCycleDay}', style: const TextStyle(fontSize: 13, color: AppColors.darkerSubText, fontWeight: FontWeight.w500, height: 1.0)),
                 ],
               ),
             ],
@@ -189,75 +194,28 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCalendarStrip() {
-    final days = [
-      {'day': 'SUN', 'date': '22', 'type': 'filled'},
-      {'day': 'MON', 'date': '23', 'type': 'filled'},
-      {'day': 'TUE', 'date': '24', 'type': 'filled'},
-      {'day': 'WED', 'date': '25', 'type': 'filled'},
-      {'day': 'THU', 'date': '26', 'type': 'outlined'},
-      {'day': 'FRI', 'date': '27', 'type': 'normal'},
-      {'day': 'SAT', 'date': '28', 'type': 'dashed'},
-    ];
-
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-      decoration: BoxDecoration(
-        color: AppColors.cardBackground,
-        borderRadius: BorderRadius.circular(AppColors.cardRadius),
-        boxShadow: [BoxShadow(color: AppColors.cardShadow, blurRadius: 15, offset: const Offset(0, 5))],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: days.map((item) {
-          return Column(
-            children: [
-              Text(item['day']!, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.darkText)),
-              const SizedBox(height: 10),
-              _buildDateBadge(item['date']!, item['type']!),
-            ],
-          );
-        }).toList(),
-      ),
-    );
-  }
-
-  Widget _buildDateBadge(String date, String type) {
-    const double size = 36;
-    if (type == 'filled') {
-      return Container(
-        width: size,
-        height: size,
-        decoration: const BoxDecoration(color: AppColors.primaryPink, shape: BoxShape.circle),
-        child: Center(child: Text(date, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14))),
-      );
-    } else if (type == 'outlined') {
-      return Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: AppColors.primaryPurple, width: 2)),
-        child: Center(child: Text(date, style: const TextStyle(color: AppColors.darkText, fontWeight: FontWeight.bold, fontSize: 14))),
-      );
-    } else if (type == 'dashed') {
-      return CustomPaint(
-        size: const Size(size, size),
-        painter: const DashedCirclePainter(color: AppColors.primaryPurple),
-        child: SizedBox(
-          width: size,
-          height: size,
-          child: Center(child: Text(date, style: const TextStyle(color: AppColors.darkText, fontWeight: FontWeight.bold, fontSize: 14))),
-        ),
-      );
-    } else {
-      return SizedBox(
-        width: size,
-        height: size,
-        child: Center(child: Text(date, style: const TextStyle(color: AppColors.darkText, fontWeight: FontWeight.bold, fontSize: 14))),
-      );
+  /// Ring arc color based on today's cycle phase
+  Color _ringColorFor(CyclePhase phase) {
+    switch (phase) {
+      case CyclePhase.period:
+        return AppColors.period;
+      case CyclePhase.fertile:
+        return AppColors.primaryPurple;
+      case CyclePhase.none:
+      case CyclePhase.follicular:
+      case CyclePhase.luteal:
+        return AppColors.primaryPink;
     }
   }
 
-  Widget _buildCycleRingWidget() {
+  Widget _buildCycleRingWidget(CycleProvider cycle) {
+    final hasData = cycle.hasCycleData;
+    final phase = cycle.currentPhase;
+
+    final String titleText = hasData ? cycle.currentPhaseLabel : 'No data yet';
+    final String valueText = hasData ? 'Day ${cycle.currentCycleDay}' : '--';
+    final String subtitleText = cycle.pregnancyChanceText;
+
     return Center(
       child: SizedBox(
         width: 270,
@@ -265,21 +223,37 @@ class HomeScreen extends StatelessWidget {
         child: Stack(
           alignment: Alignment.topCenter,
           children: [
-            SizedBox(width: 260, height: 260, child: CustomPaint(painter: MainCycleRingPainter(progress: 0.65))),
+            SizedBox(
+              width: 260,
+              height: 260,
+              child: CustomPaint(
+                painter: MainCycleRingPainter(
+                  progress: cycle.phaseProgress, // sebelumnya cycle.ringProgress
+                  color: _ringColorFor(phase),
+                  showProgress: hasData,
+                ),
+              ),
+            ),
             Positioned(
               top: 75,
               child: Column(
-                children: const [
-                  Text('Fertile window', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppColors.darkText)),
-                  SizedBox(height: 4),
-                  Text('2 days', style: TextStyle(fontSize: 34, fontWeight: FontWeight.w800, color: AppColors.darkText)),
-                  SizedBox(height: 4),
+                children: [
+                  Text(
+                    titleText,
+                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppColors.darkText),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    valueText,
+                    style: const TextStyle(fontSize: 34, fontWeight: FontWeight.w800, color: AppColors.darkText),
+                  ),
+                  const SizedBox(height: 4),
                   SizedBox(
                     width: 140,
                     child: Text(
-                      'low chance of getting pregnant',
+                      subtitleText,
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.darkerSubText, height: 1.2),
+                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.darkerSubText, height: 1.2),
                     ),
                   ),
                 ],
@@ -298,32 +272,64 @@ class HomeScreen extends StatelessWidget {
         Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.darkText)),
         GestureDetector(
           onTap: onSeeAll,
-          child: const Text('Lihat Semua', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.primaryPurple)),
+          child: const Text('See All', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.primaryPurple)),
         ),
       ],
     );
   }
 
-  Widget _buildHorizontalArticleList() {
-    final articles = [
-      {
-        'category': 'Tips Kesehatan',
-        'title': 'Cara Menjaga Mood & Energi Saat Fase Folikuler',
-        'desc': 'Pelajari nutrisi & olahraga ringan yang tepat...',
-        'image': 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=400&auto=format&fit=crop',
-      },
-      {
-        'category': 'Nutrisi',
-        'title': 'Makanan Kaya Zat Besi untuk Stamina Tubuh',
-        'desc': 'Rekomendasi menu sehat harian terbaik...',
-        'image': 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?q=80&w=400&auto=format&fit=crop',
-      },
-      {
-        'category': 'Olahraga',
-        'title': 'Jenis Yoga Ringan Selama Siklus Berjalan',
-        'desc': 'Peregangan aman untuk merilekskan otot...',
-        'image': 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?q=80&w=400&auto=format&fit=crop',
-      },
+  Widget _buildHorizontalArticleList(BuildContext context) {
+    final List<Article> articles = [
+      Article(
+        category: 'Health Tips',
+        title: 'How to Keep Your Mood & Energy Up During the Follicular Phase',
+        summary: 'Learn the right nutrition & light exercise...',
+        imageUrl: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=600&auto=format&fit=crop',
+        content:
+        'The follicular phase starts on the first day of your period and lasts until ovulation. As estrogen rises, many people notice more energy, better focus, and a brighter mood.\n\n'
+            'Make the Most of Your Energy\n'
+            'This is a great time to start new projects, try more challenging workouts, and be social. Your body recovers faster during this phase, so strength training and cardio feel easier.\n\n'
+            'Nutrition Tips\n'
+            '- Eat iron-rich foods such as spinach, lean beef, and lentils to replenish what you lost during your period.\n'
+            '- Add fresh vegetables, fermented foods, and whole grains to support rising estrogen levels.\n'
+            '- Stay hydrated throughout the day.\n\n'
+            'Light Exercise Ideas\n'
+            'Brisk walking, cycling, swimming, and yoga flows are all good choices. Listen to your body and rest when you need to.',
+      ),
+      Article(
+        category: 'Nutrition',
+        title: 'Iron-Rich Foods to Boost Your Stamina',
+        summary: 'The best healthy daily menu recommendations...',
+        imageUrl: 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?q=80&w=600&auto=format&fit=crop',
+        content:
+        'Iron is essential for producing red blood cells that carry oxygen throughout your body. During your period, you lose iron through bleeding, which can leave you feeling tired, dizzy, or weak.\n\n'
+            'Best Iron Sources\n'
+            '- Spinach, kale, and other leafy greens\n'
+            '- Lean red meat, chicken, and liver\n'
+            '- Lentils, chickpeas, and kidney beans\n'
+            '- Tofu, tempeh, and pumpkin seeds\n'
+            '- Eggs and fortified cereals\n\n'
+            'Boost Absorption\n'
+            'Pair iron-rich foods with vitamin C, such as oranges, strawberries, tomatoes, or bell peppers. Try to avoid drinking tea or coffee with your meals, as they can reduce iron absorption.\n\n'
+            'If you often feel extremely tired or look pale, talk to a doctor about checking for iron deficiency.',
+      ),
+      Article(
+        category: 'Exercise',
+        title: 'Gentle Yoga Poses for Your Cycle',
+        summary: 'Safe stretches to relax your muscles...',
+        imageUrl: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?q=80&w=600&auto=format&fit=crop',
+        content:
+        'Gentle movement improves blood circulation in the pelvic area and can ease cramps, bloating, and tension without overloading your body.\n\n'
+            '1. Child\'s Pose (Balasana)\n'
+            'Sit back on your heels and lower your chest toward the floor, arms extended forward. This stretches the lower back and relaxes the hips.\n\n'
+            '2. Cat-Cow Pose\n'
+            'On hands and knees, alternate between arching and rounding your spine. It loosens the spine and gently massages the abdominal muscles.\n\n'
+            '3. Reclining Butterfly Pose\n'
+            'Lie on your back, bring the soles of your feet together, and let your knees fall open. This opens the hips and calms the nervous system.\n\n'
+            '4. Legs-Up-the-Wall Pose\n'
+            'Rest your legs against a wall for 5 to 10 minutes to relieve heaviness and lower back discomfort.\n\n'
+            'Hold each pose for 5 to 8 slow breaths, and stop if anything feels painful.',
+      ),
     ];
 
     return SizedBox(
@@ -339,7 +345,18 @@ class HomeScreen extends StatelessWidget {
             width: 310,
             margin: const EdgeInsets.only(right: 14),
             child: BounceButton(
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ArticleDetailScreen(
+                      article: article,
+                      // Rekomendasi "Read Next": semua artikel Home selain yang dibuka
+                      relatedArticles: articles.where((a) => a != article).toList(),
+                    ),
+                  ),
+                );
+              },
               child: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
@@ -351,7 +368,7 @@ class HomeScreen extends StatelessWidget {
                   children: [
                     ClipRRect(
                       borderRadius: BorderRadius.circular(16),
-                      child: Image.network(article['image'] as String, width: 95, height: double.infinity, fit: BoxFit.cover),
+                      child: Image.network(article.imageUrl, width: 95, height: double.infinity, fit: BoxFit.cover),
                     ),
                     const SizedBox(width: 14),
                     Expanded(
@@ -362,18 +379,18 @@ class HomeScreen extends StatelessWidget {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                             decoration: BoxDecoration(color: AppColors.primaryPink.withOpacity(0.12), borderRadius: BorderRadius.circular(8)),
-                            child: Text(article['category'] as String, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.primaryPink)),
+                            child: Text(article.category, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.primaryPink)),
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            article['title'] as String,
+                            article.title,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.darkText, height: 1.2),
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            article['desc'] as String,
+                            article.summary,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(fontSize: 11, color: AppColors.darkerSubText, fontWeight: FontWeight.w400),
@@ -394,7 +411,14 @@ class HomeScreen extends StatelessWidget {
 
 class MainCycleRingPainter extends CustomPainter {
   final double progress;
-  MainCycleRingPainter({required this.progress});
+  final Color color;
+  final bool showProgress;
+
+  MainCycleRingPainter({
+    required this.progress,
+    this.color = AppColors.primaryPink,
+    this.showProgress = true,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -408,14 +432,17 @@ class MainCycleRingPainter extends CustomPainter {
       ..strokeWidth = strokeWidth;
     canvas.drawCircle(center, radius, bgPaint);
 
+    // No log data yet: show the empty track only
+    if (!showProgress) return;
+
     final Paint activePaint = Paint()
-      ..color = AppColors.primaryPink
+      ..color = color
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
       ..strokeWidth = strokeWidth;
 
-    double startAngle = math.pi * 0.75;
-    double sweepAngle = (2 * math.pi) * progress;
+    final double startAngle = math.pi * 0.75;
+    final double sweepAngle = (2 * math.pi) * progress;
 
     canvas.drawArc(Rect.fromCircle(center: center, radius: radius), startAngle, sweepAngle, false, activePaint);
 
@@ -425,9 +452,12 @@ class MainCycleRingPainter extends CustomPainter {
     final Offset dotCenter = Offset(dotX, dotY);
 
     canvas.drawCircle(dotCenter, 14, Paint()..color = Colors.white);
-    canvas.drawCircle(dotCenter, 9, Paint()..color = AppColors.primaryPink);
+    canvas.drawCircle(dotCenter, 9, Paint()..color = color);
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+  bool shouldRepaint(covariant MainCycleRingPainter oldDelegate) =>
+      oldDelegate.progress != progress ||
+          oldDelegate.color != color ||
+          oldDelegate.showProgress != showProgress;
 }
