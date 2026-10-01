@@ -4,6 +4,7 @@ import '../../features/calendar/screens/calendar_screen.dart';
 import '../../features/insights/screens/insights_screen.dart';
 import '../../features/profile/screens/profile_screen.dart';
 import '../../features/profile/screens/login_screen.dart';
+import '../../features/lunary_ai/screens/lunary_ai_screen.dart';
 
 enum AppNavTab {
   cycle,
@@ -13,7 +14,7 @@ enum AppNavTab {
   profile,
 }
 
-// Status Auth Global
+// Global auth status
 bool isUserLoggedIn = false;
 Map<String, String>? globalUserData;
 
@@ -49,18 +50,15 @@ void handleAppNavTap(BuildContext context, AppNavTab tab) {
 
     case AppNavTab.lunaryAi:
       checkAuthAndExecute(context, onSuccess: () {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Feature coming soon!'),
-            behavior: SnackBarBehavior.floating,
-          ),
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const LunaryAiScreen()),
         );
       });
       break;
   }
 }
 
-// Helper proteksi fitur
+// Feature protection helper
 void checkAuthAndExecute(BuildContext context, {required VoidCallback onSuccess}) {
   if (isUserLoggedIn) {
     onSuccess();
@@ -69,44 +67,44 @@ void checkAuthAndExecute(BuildContext context, {required VoidCallback onSuccess}
   }
 }
 
-// Pop-up Ajakan Login / Registrasi
+// Login / Register prompt pop-up
 void showLoginRequiredDialog(BuildContext context) {
   showDialog(
     context: context,
     builder: (dialogContext) => AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       title: const Text(
-        'Akses Terbatas',
+        'Limited Access',
         style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
       ),
       content: const Text(
-        'Fitur ini membutuhkan akun agar data kesehatan Anda dapat tersimpan dengan aman di cloud.',
+        'This feature requires an account so your health data can be safely stored in the cloud.',
         style: TextStyle(fontSize: 13, height: 1.4),
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(dialogContext),
-          child: const Text('Nanti Saja', style: TextStyle(color: Colors.grey)),
+          child: const Text('Maybe Later', style: TextStyle(color: Colors.grey)),
         ),
         ElevatedButton(
           onPressed: () async {
-            Navigator.pop(dialogContext); // Tutup dialog terlebih dahulu
+            Navigator.pop(dialogContext); // Close the dialog first
 
-            // Buka LoginScreen dan tunggu hasil login
+            // Open LoginScreen and wait for the login result
             final result = await Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const LoginScreen()),
             );
 
-            // Jika user berhasil login
+            // If the user logged in successfully
             if (result != null && result is Map<String, dynamic>) {
               isUserLoggedIn = true;
               globalUserData = {
-                'name': result['name'] ?? 'Pengguna Lunary',
+                'name': result['name'] ?? 'Lunary User',
                 'email': result['email'] ?? 'user@lunary.com',
               };
 
-              // Buka halaman Profile untuk menampilkan status login terbaru
+              // Open the Profile page to show the latest login status
               if (context.mounted) {
                 Navigator.of(context).push(
                   MaterialPageRoute(
