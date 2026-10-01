@@ -68,7 +68,7 @@ class ArticleListScreen extends StatelessWidget {
               padding: EdgeInsets.all(32.0),
               child: Center(
                 child: Text(
-                  "Belum ada artikel untuk kategori ini.",
+                  "No articles in this category yet.",
                   style: TextStyle(color: Colors.grey),
                 ),
               ),
@@ -86,7 +86,13 @@ class ArticleListScreen extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => ArticleDetailScreen(article: article),
+                        builder: (context) => ArticleDetailScreen(
+                          article: article,
+                          // Rekomendasi "Read Next": artikel lain di kategori ini
+                          relatedArticles: category.articles
+                              .where((a) => a != article)
+                              .toList(),
+                        ),
                       ),
                     );
                   },
