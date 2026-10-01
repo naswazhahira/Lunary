@@ -17,16 +17,16 @@ class InsightsScreen extends StatelessWidget {
             bannerImage: "assets/images/cycle.jpg",
             articles: [
               Article(
-                title: "Apa Itu Menstruasi dan Bagaimana Siklusnya Bekerja?",
-                summary: "Pelajari secara mendalam proses biologis menstruasi, komponen darah, fluktuasi hormon, dan pentingnya mencatat siklus Anda.",
-                content: "Menstruasi adalah fenomena pengelupasan lapisan dalam rahim (endometrium) dan pendarahan berkala yang dipengaruhi oleh perubahan hormon seksual secara periodik yang disekresikan oleh ovarium.\n\nKecuali pada wanita setelah kehamilan dan menopause, menstruasi terjadi sekitar sebulan sekali. Menstruasi dimulai saat pubertas (disebut menarke) dan berhenti secara permanen setelah menopause.\n\nKomponen Utama Darah Haid\nKomponen utama menstruasi adalah darah. Selain itu, terdapat sisa-sisa jaringan endometrium, sel-sel inflamasi, lendir serviks, serta sel-sel epitel vagina yang terkelupas. Pendarahan menstruasi tidak mudah membeku dalam kondisi normal karena adanya enzim fibrinolitik alami.\n\nSiklus Menstruasi Tidak Selalu Tepat 28 Hari\nPanjang siklus menstruasi rata-rata berkisar antara 21 hingga 35 hari. Hanya sekitar 10%-15% wanita yang memiliki siklus tepat 28 hari, jadi Anda tidak perlu khawatir jika siklus Anda sedikit bervariasi.\n\nSelain itu, setidaknya 20% wanita mengalami siklus tidak teratur. Pendarahan haid umumnya berlangsung selama 3–7 hari, dengan rata-rata 5 hari, dan total kehilangan darah dalam satu siklus berkisar antara 15–75 ml.",
+                title: "What Is Menstruation and How Does the Cycle Work?",
+                summary: "Learn about the biological process of menstruation, the components of menstrual blood, hormone fluctuations, and why tracking your cycle matters.",
+                content: "Menstruation is the shedding of the lining of the uterus (the endometrium) along with periodic bleeding, driven by cyclical changes in sex hormones released by the ovaries.\n\nExcept during pregnancy and after menopause, menstruation occurs roughly once a month. It begins at puberty (called menarche) and stops permanently after menopause.\n\nMain Components of Menstrual Blood\nThe main component of menstruation is blood. It also contains remnants of endometrial tissue, inflammatory cells, cervical mucus, and shed vaginal epithelial cells. Menstrual blood does not clot easily under normal conditions because of natural fibrinolytic enzymes.\n\nYour Cycle Is Not Always Exactly 28 Days\nThe average menstrual cycle ranges from 21 to 35 days. Only about 10%-15% of women have a cycle of exactly 28 days, so there is no need to worry if yours varies slightly.\n\nIn addition, at least 20% of women experience irregular cycles. Menstrual bleeding usually lasts 3–7 days, averaging 5 days, and total blood loss per cycle ranges from 15–75 ml.",
                 imageUrl: "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?q=80&w=600&auto=format&fit=crop",
                 category: "Understanding the Menstrual Cycle",
               ),
               Article(
-                title: "4 Fase Utama dalam Siklus Menstruasi",
-                summary: "Penjelasan detail mengenai Fase Menstruasi, Folikular, Ovulasi, dan Luteal beserta perubahan fisik dan emosionalnya.",
-                content: "Siklus menstruasi terbagi menjadi 4 fase biologis yang berkelanjutan:\n\n1. Fase Menstruasi (Hari 1-7):\nFase ini dimulai pada hari pertama darah keluar. Kadar hormon estrogen dan progesteron berada di titik terendah karena tidak terjadi pembuahan sel telur. Lapisan endometrium meluruh. Gejala yang umum dirasakan meliputi lemas, kram perut ringan hingga sedang, dan perubahan suasana hati.\n\n2. Fase Folikular (Hari 1-14):\nDimulai bersamaan dengan fase menstruasi dan berlanjut hingga masa ovulasi. Otak merangsang pelepasan Follicle Stimulating Hormone (FSH) untuk mematangkan folikel di dalam ovarium. Estrogen meningkat tajam untuk mempertebal kembali jaringan endometrium. Di fase ini Anda akan merasa lebih bertenaga, fokus, dan percaya diri.\n\n3. Fase Ovulasi (Sekitar Hari 14):\nLonjakan Luteinizing Hormone (LH) memicu pelepasan sel telur matang dari ovarium menuju tuba falopi. Ini adalah puncak masa subur. Sel telur bertahan hidup selama 12–24 jam. Gejalanya mencakup peningkatan suhu tubuh basal dan lendir serviks yang menjadi bening serta elastis seperti putih telur.\n\n4. Fase Luteal (Hari 15-28):\nBekas folikel berubah menjadi korpus luteum yang menghasilkan progesteron. Hormon ini menjaga dinding rahim tetap tebal dan siap menerima sel telur yang dibuahi. Jika tidak ada pembuahan, korpus luteum menyusut, hormon anjlok, dan gejala PMS (Pra-Menstruasi) mulai muncul sebelum siklus baru dimulai.",
+                title: "The 4 Main Phases of the Menstrual Cycle",
+                summary: "A detailed look at the Menstrual, Follicular, Ovulation, and Luteal phases and their physical and emotional changes.",
+                content: "The menstrual cycle is divided into 4 continuous biological phases:\n\n1. Menstrual Phase (Days 1-7):\nThis phase begins on the first day of bleeding. Estrogen and progesterone are at their lowest because the egg was not fertilized. The endometrial lining sheds. Common symptoms include fatigue, mild to moderate abdominal cramps, and mood changes.\n\n2. Follicular Phase (Days 1-14):\nThis phase starts together with the menstrual phase and continues until ovulation. The brain stimulates the release of Follicle Stimulating Hormone (FSH) to mature follicles in the ovary. Estrogen rises sharply to rebuild the endometrial tissue. In this phase you will likely feel more energetic, focused, and confident.\n\n3. Ovulation Phase (Around Day 14):\nA surge of Luteinizing Hormone (LH) triggers the release of a mature egg from the ovary into the fallopian tube. This is the peak of the fertile window. The egg survives for 12–24 hours. Signs include a rise in basal body temperature and cervical mucus that becomes clear and stretchy like egg white.\n\n4. Luteal Phase (Days 15-28):\nThe empty follicle turns into the corpus luteum, which produces progesterone. This hormone keeps the uterine lining thick and ready to receive a fertilized egg. If there is no fertilization, the corpus luteum shrinks, hormone levels drop, and PMS (premenstrual syndrome) symptoms begin before a new cycle starts.",
                 imageUrl: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=600&auto=format&fit=crop",
                 category: "Understanding the Menstrual Cycle",
               ),
@@ -37,16 +37,16 @@ class InsightsScreen extends StatelessWidget {
             bannerImage: "https://images.unsplash.com/photo-1516549655169-df83a0774514?q=80&w=600&auto=format&fit=crop",
             articles: [
               Article(
-                title: "Mengenal 4 Hormon Utama Pengendali Siklus Wanita",
-                summary: "Estrogen, Progesteron, FSH, dan LH: Cara kerja, fungsi tubuh, dan efek ketidakseimbangannya.",
-                content: "Sistem reproduksi wanita diatur secara cermat oleh empat hormon utama:\n\n1. Estrogen:\nHormon ini bertugas membangun dan menebalkan dinding rahim, meningkatkan elastisitas kulit, menjaga kesehatan tulang, serta memicu produksi lendir serviks masa subur.\n\n2. Progesteron:\nDipertahankan setelah ovulasi untuk menenangkan rahim dan mendukung kehamilan. Progesteron memiliki efek menenangkan sistem saraf, namun kadar tinggi tanpa imbangan estrogen dapat memicu kembung, sembelit, dan payudara nyeri.\n\n3. FSH (Follicle Stimulating Hormone):\nDihasilkan oleh kelenjar hipofisis di otak untuk mengendalikan matangnya folikel telur di ovarium.\n\n4. LH (Luteinizing Hormone):\nHormon pemicu utama ovulasi. Tanpa lonjakan LH yang cukup, sel telur tidak akan dilepaskan dari folikel.",
+                title: "Meet the 4 Main Hormones That Control the Female Cycle",
+                summary: "Estrogen, Progesterone, FSH, and LH: how they work, what they do in the body, and the effects of imbalance.",
+                content: "The female reproductive system is carefully regulated by four main hormones:\n\n1. Estrogen:\nThis hormone builds and thickens the uterine lining, improves skin elasticity, supports bone health, and triggers the production of fertile cervical mucus.\n\n2. Progesterone:\nMaintained after ovulation to calm the uterus and support pregnancy. Progesterone has a calming effect on the nervous system, but high levels without enough estrogen to balance it can cause bloating, constipation, and breast tenderness.\n\n3. FSH (Follicle Stimulating Hormone):\nProduced by the pituitary gland in the brain to control the maturation of egg follicles in the ovaries.\n\n4. LH (Luteinizing Hormone):\nThe main trigger for ovulation. Without a sufficient LH surge, the egg will not be released from the follicle.",
                 imageUrl: "https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=600&auto=format&fit=crop",
                 category: "Hormones & Balance",
               ),
               Article(
-                title: "Tanda-Tanda Ketidakseimbangan Hormon pada Wanita",
-                summary: "Ciri-ciri fisik dan mental ketika hormon estrogen dan progesteron tidak seimbang.",
-                content: "Ketidakseimbangan hormon sering terjadi akibat stres kronis, pola makan buruk, atau masalah medis tertentu. Tanda-tandanya meliputi:\n\n- Siklus haid yang tidak teratur atau sering melompat bulan.\n- Jerawat membandel di area rahang dan dagu.\n- Peningkatan berat badan yang sulit dikontrol.\n- Rasa lelah berlebihan meskipun tidur cukup.\n- Perubahan suasana hati ekstrim dan kecemasan tinggi menjelang haid.",
+                title: "Signs of Hormonal Imbalance in Women",
+                summary: "Physical and mental signs when estrogen and progesterone are out of balance.",
+                content: "Hormonal imbalance often results from chronic stress, poor diet, or certain medical conditions. Signs include:\n\n- Irregular periods or frequently skipped months.\n- Stubborn acne around the jawline and chin.\n- Weight gain that is hard to control.\n- Excessive tiredness even when you get enough sleep.\n- Extreme mood swings and high anxiety before your period.",
                 imageUrl: "https://images.unsplash.com/photo-1516549655169-df83a0774514?q=80&w=600&auto=format&fit=crop",
                 category: "Hormones & Balance",
               ),
@@ -57,9 +57,9 @@ class InsightsScreen extends StatelessWidget {
             bannerImage: "https://images.unsplash.com/photo-1518611012118-696072aa579a?q=80&w=600&auto=format&fit=crop",
             articles: [
               Article(
-                title: "Cara Menentukan Masa Subur Lewat Lendir Serviks",
-                summary: "Panduan praktis mengamati tekstur dan konsistensi cairan vagina harian.",
-                content: "Lendir serviks diproduksi oleh leher rahim dan mengalami perubahan tekstur yang signifikan sepanjang siklus akibat efek kadar estrogen:\n\n- Pasca Menstruasi (Hari 1–3 setelah haid): Vagina terasa agak kering dan tidak ada lendir yang tersisa.\n- Fase Pra-Ovulasi: Lendir mulai muncul dengan warna keruh, agak lengket, atau bertesktur seperti krim makanan.\n- Puncak Masa Subur (Saat Ovulasi): Lendir berubah menjadi bening, licin, dan dapat diregangkan hingga beberapa sentimeter tanpa putus (mirip dengan putih telur mentah).\n\nLendir bening licin ini berfungsi menyediakan nutrisi dan mempermudah sperma berenang menuju sel telur. Setelah ovulasi selesai, lendir akan kembali kental atau kering kembali.",
+                title: "How to Identify Your Fertile Window Through Cervical Mucus",
+                summary: "A practical guide to observing the texture and consistency of daily vaginal discharge.",
+                content: "Cervical mucus is produced by the cervix and changes significantly in texture throughout the cycle due to the effects of estrogen:\n\n- After Menstruation (Days 1–3 after your period): The vagina feels fairly dry and there is little to no mucus.\n- Pre-Ovulation Phase: Mucus begins to appear, cloudy, slightly sticky, or with a creamy texture.\n- Peak Fertility (During Ovulation): Mucus becomes clear, slippery, and can be stretched several centimeters without breaking (similar to raw egg white).\n\nThis clear, slippery mucus provides nutrients and helps sperm swim toward the egg. After ovulation is over, the mucus becomes thick again or dries up.",
                 imageUrl: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?q=80&w=600&auto=format&fit=crop",
                 category: "Cervical Mucus & Fertile Window",
               ),
@@ -70,9 +70,9 @@ class InsightsScreen extends StatelessWidget {
             bannerImage: "https://images.unsplash.com/photo-1584017911766-d451b3d0e843?q=80&w=600&auto=format&fit=crop",
             articles: [
               Article(
-                title: "Mendeteksi Ovulasi Menggunakan Suhu Tubuh Basal",
-                summary: "Teknik mencatat suhu terendah tubuh di pagi hari untuk mengonfirmasi pembuahan.",
-                content: "Suhu Tubuh Basal (BBT) adalah suhu tubuh paling dasar yang diukur sesaat setelah bangun tidur di pagi hari, sebelum melakukan aktivitas fisik apapun termasuk beranjak dari tempat tidur.\n\nCara Melakukannya:\nGunakan termometer basal (yang memiliki akurasi dua angka di belakang koma). Ukur suhu di bawah lidah setiap pagi pada jam yang sama.\n\nGrafik Suhu:\nSebelum ovulasi, BBT berada di kisaran rendah (sekitar 36.1°C – 36.4°C). Begitu ovulasi terjadi, hormon progesteron yang dilepaskan akan menaikkan suhu tubuh sebesar 0.2°C – 0.5°C hingga siklus berakhir.",
+                title: "Detecting Ovulation Using Basal Body Temperature",
+                summary: "A technique for recording your lowest body temperature in the morning to confirm ovulation.",
+                content: "Basal Body Temperature (BBT) is your body's lowest resting temperature, measured right after waking up in the morning, before any physical activity, including getting out of bed.\n\nHow to Do It:\nUse a basal thermometer (one that is accurate to two decimal places). Take your temperature under the tongue every morning at the same time.\n\nTemperature Chart:\nBefore ovulation, BBT stays in a lower range (around 36.1°C – 36.4°C). Once ovulation occurs, the progesterone that is released raises your body temperature by 0.2°C – 0.5°C until the cycle ends.",
                 imageUrl: "https://images.unsplash.com/photo-1584017911766-d451b3d0e843?q=80&w=600&auto=format&fit=crop",
                 category: "Basal Body Temperature (BBT)",
               ),
@@ -88,9 +88,9 @@ class InsightsScreen extends StatelessWidget {
             bannerImage: "https://images.unsplash.com/photo-1508672019048-805479767513?q=80&w=600&auto=format&fit=crop",
             articles: [
               Article(
-                title: "Penyebab Utama Menstruasi Datang Tidak Teratur",
-                summary: "Faktor-faktor pemicu siklus lambat, terlalu cepat, atau sering meloncat bulan.",
-                content: "Siklus menstruasi dianggap tidak teratur jika panjangnya kurang dari 21 hari atau lebih dari 35 hari secara berturut-turut.\n\nFaktor Penyebab Utama:\n1. Stres Kronis: Stres meningkatkan kadar hormon kortisol yang dapat memblokir sinyal otak ke ovarium.\n2. Pola Makan & Diet Ketat: Tubuh yang kekurangan energi akan menunda ovulasi untuk menghemat kalori.\n3. Sindrom Polikistik Ovarium (PCOS): Ketidakseimbangan androgen yang menghambat pematangan folikel.\n4. Gangguan Tiroid: Kelenjar tiroid yang terlalu aktif (hipertiroid) atau kurang aktif (hipotiroid) memengaruhi hormon reproduksi.",
+                title: "Main Causes of Irregular Periods",
+                summary: "Factors that trigger slow, overly frequent, or frequently skipped cycles.",
+                content: "A menstrual cycle is considered irregular if it is shorter than 21 days or longer than 35 days several times in a row.\n\nMain Causes:\n1. Chronic Stress: Stress raises cortisol levels, which can block signals from the brain to the ovaries.\n2. Diet & Strict Dieting: A body low on energy will delay ovulation to conserve calories.\n3. Polycystic Ovary Syndrome (PCOS): An androgen imbalance that hinders follicle maturation.\n4. Thyroid Disorders: An overactive (hyperthyroid) or underactive (hypothyroid) thyroid gland affects reproductive hormones.",
                 imageUrl: "https://images.unsplash.com/photo-1508672019048-805479767513?q=80&w=600&auto=format&fit=crop",
                 category: "Irregular Periods",
               ),
@@ -101,9 +101,9 @@ class InsightsScreen extends StatelessWidget {
             bannerImage: "https://images.unsplash.com/photo-1579684385127-1ef15d508118?q=80&w=600&auto=format&fit=crop",
             articles: [
               Article(
-                title: "Berapa Hari Batas Normal Telat Haid dan Kapan Harus Berobat?",
-                summary: "Panduan praktis membedakan telat haid wajar dan gejala gangguan medis.",
-                content: "Keterlambatan haid selama 1 hingga 7 hari dari perkiraan jadwal masih tergolong normal karena tubuh manusia dipengaruhi banyak variabel harian.\n\nKapan Harus Khawatir?\nJika keterlambatan mencapai lebih dari 14 hari tanpa adanya tes kehamilan positif, atau jika Anda melewatkan 3 siklus berturut-turut (kondisi amenore sekunder), Anda disarankan melakukan pemeriksaan dokter spesialis kebidanan dan kandungan untuk evaluasi USG rahim.",
+                title: "How Many Days Late Is Normal, and When Should You See a Doctor?",
+                summary: "A practical guide to telling a normal late period from signs of a medical problem.",
+                content: "A period that is 1 to 7 days later than expected is still considered normal, since the human body is affected by many daily variables.\n\nWhen to Be Concerned:\nIf your period is more than 14 days late without a positive pregnancy test, or if you miss 3 cycles in a row (a condition called secondary amenorrhea), you should see an obstetrician-gynecologist for an evaluation, including an ultrasound of the uterus.",
                 imageUrl: "https://images.unsplash.com/photo-1579684385127-1ef15d508118?q=80&w=600&auto=format&fit=crop",
                 category: "Delayed Menstruation",
               ),
@@ -114,9 +114,9 @@ class InsightsScreen extends StatelessWidget {
             bannerImage: "https://images.unsplash.com/photo-1512290900673-0498a4d70428?q=80&w=600&auto=format&fit=crop",
             articles: [
               Article(
-                title: "Membedakan Flek Cokelat (Spotting) dan Darah Menstruasi",
-                summary: "Kenali perbedaan volume, warna, dan penyebab timbulnya flek di luar periode haid.",
-                content: "Flek atau spotting adalah perdarahan ringan yang biasanya berupa tetesan merah tua atau cokelat pada celana dalam tanpa memerlukan pembalut tebal.\n\nPenyebab Flek di Luar Jadwal:\n- Pendarahan Implantasi: Terjadi 1–2 minggu setelah pembuahan saat janin menempel di rahim.\n- Pendarahan Ovulasi: Lonjakan hormon ringan saat pelepasan sel telur.\n- Efek Kontrasepsi: Awal penggunaan pil KB atau IUD.",
+                title: "Telling Brown Spotting Apart from Menstrual Blood",
+                summary: "Learn the differences in volume, color, and causes of spotting outside your period.",
+                content: "Spotting is light bleeding, usually dark red or brown drops on your underwear that do not require a thick pad.\n\nCauses of Spotting Outside Your Period:\n- Implantation Bleeding: Occurs 1–2 weeks after conception when the embryo attaches to the uterus.\n- Ovulation Bleeding: A mild hormone surge when the egg is released.\n- Contraceptive Effects: The start of using birth control pills or an IUD.",
                 imageUrl: "https://images.unsplash.com/photo-1512290900673-0498a4d70428?q=80&w=600&auto=format&fit=crop",
                 category: "Spotting vs Normal Flow",
               ),
@@ -127,9 +127,9 @@ class InsightsScreen extends StatelessWidget {
             bannerImage: "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?q=80&w=600&auto=format&fit=crop",
             articles: [
               Article(
-                title: "Mengenal Menoragia: Pendarahan Haid Berlebihan",
-                summary: "Tanda-tanda perdarahan berlebih dan efeknya terhadap anemia.",
-                content: "Menoragia terjadi jika haid berlangsung lebih dari 7 hari atau Anda harus mengganti pembalut penuh setiap 1–2 jam secara terus-menerus.\n\nBahaya Menoragia:\nPendarahan hebat dapat memicu anemia defisiensi besi yang ditandai dengan kulit pucat, napas pendek, pusing, dan rasa lelah ekstrem. Kondisi ini sering disebabkan oleh miom, polip rahim, atau gangguan penebalan dinding rahim.",
+                title: "Understanding Menorrhagia: Excessively Heavy Periods",
+                summary: "Signs of excessive bleeding and its effect on anemia.",
+                content: "Menorrhagia occurs when your period lasts more than 7 days or you need to change a fully soaked pad every 1–2 hours continuously.\n\nThe Dangers of Menorrhagia:\nHeavy bleeding can lead to iron deficiency anemia, marked by pale skin, shortness of breath, dizziness, and extreme fatigue. This condition is often caused by fibroids, uterine polyps, or disorders of the uterine lining.",
                 imageUrl: "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?q=80&w=600&auto=format&fit=crop",
                 category: "Heavy Bleeding (Menorrhagia)",
               ),
@@ -145,9 +145,9 @@ class InsightsScreen extends StatelessWidget {
             bannerImage: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=600&auto=format&fit=crop",
             articles: [
               Article(
-                title: "Solusi Meredakan Dismenore (Kram Perut Haid)",
-                summary: "Langkah-langkah alami dan pertolongan medis untuk meredakan kram perut bawah.",
-                content: "Kram haid (dismenore) disebabkan oleh kontraksi otot rahim yang dipicu oleh pelepasan senyawa kimia prostaglandin.\n\nLangkah Penanganan Mandiri:\n1. Kompres Hangat: Tempelkan botol berisi air hangat atau bantalan pemanas di perut bagian bawah selama 15–20 menit.\n2. Minuman Herbal: Minum seduhan jahe hangat atau teh chamomile yang kaya senyawa antiinflamasi.\n3. Pijatan Ringan: Pijat lembut area perut bawah melingkar menggunakan minyak esensial lavender.\n4. Obatan Pereda Nyeri: Jika nyeri tidak tertahankan, gunakan obat pereda nyeri jenis NSAID seperti Ibuprofen sesuai petunjuk.",
+                title: "Solutions for Easing Dysmenorrhea (Period Cramps)",
+                summary: "Natural steps and medical relief to ease lower abdominal cramps.",
+                content: "Period cramps (dysmenorrhea) are caused by uterine muscle contractions triggered by the release of chemical compounds called prostaglandins.\n\nSelf-Care Steps:\n1. Warm Compress: Place a hot water bottle or heating pad on your lower abdomen for 15–20 minutes.\n2. Herbal Drinks: Drink warm ginger tea or chamomile tea, which are rich in anti-inflammatory compounds.\n3. Gentle Massage: Gently massage your lower abdomen in circles using lavender essential oil.\n4. Pain Relievers: If the pain is unbearable, use an NSAID pain reliever such as ibuprofen as directed.",
                 imageUrl: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=600&auto=format&fit=crop",
                 category: "Relieving Period Cramps",
               ),
@@ -158,9 +158,9 @@ class InsightsScreen extends StatelessWidget {
             bannerImage: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?q=80&w=600&auto=format&fit=crop",
             articles: [
               Article(
-                title: "Mengendalikan Emosi dan Perubahan Suasana Hati Saat PMS",
-                summary: "Tips menjaga kesehatan mental dan stabilitas emosi menjelang hari menstruasi.",
-                content: "Perubahan kadar estrogen dan progesteron secara drastis jelang haid dapat mempengaruhi neurotransmiter serotonin yang mengatur kebahagiaan.\n\nTips Stabilitas Emosi:\n- Kurangi Asupan Kafein dan Gula: Mencegah perubahan gula darah drastis yang memicu kecemasan.\n- Olahraga Ringan: Jalan kaki 20 menit membantu otak melepaskan hormon endorfin.\n- Tidur Teratur: Cukupi waktu tidur 7–8 jam per malam untuk menjaga regulasi emosi.",
+                title: "Managing Emotions and Mood Swings During PMS",
+                summary: "Tips for protecting your mental health and emotional stability before your period.",
+                content: "Drastic changes in estrogen and progesterone levels before your period can affect serotonin, the neurotransmitter that regulates happiness.\n\nTips for Emotional Stability:\n- Cut Back on Caffeine and Sugar: Prevents sharp blood sugar swings that can trigger anxiety.\n- Light Exercise: A 20-minute walk helps the brain release endorphins.\n- Sleep Regularly: Get 7–8 hours of sleep per night to keep your emotions well regulated.",
                 imageUrl: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?q=80&w=600&auto=format&fit=crop",
                 category: "Managing Mood Swings",
               ),
@@ -171,9 +171,9 @@ class InsightsScreen extends StatelessWidget {
             bannerImage: "https://images.unsplash.com/photo-1498837167922-ddd27525d352?q=80&w=600&auto=format&fit=crop",
             articles: [
               Article(
-                title: "Panduan Makanan Nutrisi Saat Menstruasi",
-                summary: "Menu pilihan kaya zat besi, magnesium, dan Omega-3 untuk kebugaran tubuh.",
-                content: "Nutrisi yang tepat membantu mempercepat pemulihan energi selama pendarahan:\n\n- Makanan Kaya Zat Besi: Bayam, daging sapi tanpa lemak, dan kacang-kacangan meregenerasi sel darah.\n- Makanan Kaya Magnesium: Cokelat hitam (dark chocolate), pisang, dan alpukat merelaksasi kontraksi otot.\n- Asam Lemak Omega-3: Ikan salmon dan biji chia bertindak sebagai pereda peradangan alami.",
+                title: "A Nutrition Guide for Your Period",
+                summary: "Menu picks rich in iron, magnesium, and Omega-3 to keep your body feeling good.",
+                content: "The right nutrition helps you recover your energy faster during bleeding:\n\n- Iron-Rich Foods: Spinach, lean beef, and legumes help regenerate blood cells.\n- Magnesium-Rich Foods: Dark chocolate, bananas, and avocados help relax muscle contractions.\n- Omega-3 Fatty Acids: Salmon and chia seeds act as natural anti-inflammatories.",
                 imageUrl: "https://images.unsplash.com/photo-1498837167922-ddd27525d352?q=80&w=600&auto=format&fit=crop",
                 category: "Nutrition & Diet Tips",
               ),
@@ -184,9 +184,9 @@ class InsightsScreen extends StatelessWidget {
             bannerImage: "https://images.unsplash.com/photo-1518611012118-696072aa579a?q=80&w=600&auto=format&fit=crop",
             articles: [
               Article(
-                title: "Gerakan Peregangan Yoga Ringan Meredakan Ketegangan Panggul",
-                summary: "Pose yoga sederhana untuk melemaskan panggul dan pinggang yang tegang.",
-                content: "Aktivitas fisik ringan terbukti memperlancar sirkulasi darah panggul tanpa membebankan tubuh:\n\n1. Child's Pose (Balasana): Duduk bertumpu pada tumit dan rebahkan dada ke depan untuk merenggangkan punggung bawah.\n2. Cat-Cow Pose: Melemaskan tulang belakang dan otot perut bagian bawah secara perlahan.",
+                title: "Gentle Yoga Stretches to Relieve Pelvic Tension",
+                summary: "Simple yoga poses to loosen a tight pelvis and lower back.",
+                content: "Light physical activity has been shown to improve pelvic blood circulation without straining the body:\n\n1. Child's Pose (Balasana): Sit back on your heels and lower your chest forward to stretch the lower back.\n2. Cat-Cow Pose: Slowly loosens the spine and the lower abdominal muscles.",
                 imageUrl: "https://images.unsplash.com/photo-1518611012118-696072aa579a?q=80&w=600&auto=format&fit=crop",
                 category: "Exercise & Stretches",
               ),
