@@ -7,6 +7,40 @@ class ArticleListScreen extends StatelessWidget {
 
   const ArticleListScreen({Key? key, required this.category}) : super(key: key);
 
+  /// Helper untuk menangani gambar lokal (assets/) dan jaringan (http/https)
+  Widget _buildImage(String path, {double? width, double? height, BoxFit fit = BoxFit.cover}) {
+    if (path.startsWith('assets/')) {
+      return Image.asset(
+        path,
+        width: width,
+        height: height,
+        fit: fit,
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            width: width,
+            height: height,
+            color: Colors.grey[200],
+            child: const Icon(Icons.broken_image, color: Colors.grey),
+          );
+        },
+      );
+    }
+    return Image.network(
+      path,
+      width: width,
+      height: height,
+      fit: fit,
+      errorBuilder: (context, error, stackTrace) {
+        return Container(
+          width: width,
+          height: height,
+          color: Colors.grey[200],
+          child: const Icon(Icons.broken_image, color: Colors.grey),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,10 +66,7 @@ class ArticleListScreen extends StatelessWidget {
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    Image.network(
-                      category.bannerImage,
-                      fit: BoxFit.cover,
-                    ),
+                    _buildImage(category.bannerImage, fit: BoxFit.cover),
                     Container(
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
@@ -78,7 +109,8 @@ class ArticleListScreen extends StatelessWidget {
               physics: const NeverScrollableScrollPhysics(),
               padding: const EdgeInsets.symmetric(horizontal: 16),
               itemCount: category.articles.length,
-              separatorBuilder: (context, index) => const Divider(height: 24, color: Color(0xFFEEEEEE)),
+              separatorBuilder: (context, index) =>
+              const Divider(height: 24, color: Color(0xFFEEEEEE)),
               itemBuilder: (context, index) {
                 final article = category.articles[index];
                 return InkWell(
@@ -88,7 +120,6 @@ class ArticleListScreen extends StatelessWidget {
                       MaterialPageRoute(
                         builder: (context) => ArticleDetailScreen(
                           article: article,
-                          // Rekomendasi "Read Next": artikel lain di kategori ini
                           relatedArticles: category.articles
                               .where((a) => a != article)
                               .toList(),
@@ -101,7 +132,7 @@ class ArticleListScreen extends StatelessWidget {
                     children: [
                       ClipRRect(
                         borderRadius: BorderRadius.circular(12),
-                        child: Image.network(
+                        child: _buildImage(
                           article.imageUrl,
                           width: 70,
                           height: 70,
