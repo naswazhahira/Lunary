@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 
 class SocialLoginRow extends StatelessWidget {
@@ -53,7 +54,6 @@ class SocialLoginRow extends StatelessWidget {
   }
 }
 
-/// Logo Google "G" 4 warna (tanpa gambar / internet)
 class _GoogleLogo extends StatelessWidget {
   const _GoogleLogo();
 
@@ -63,13 +63,13 @@ class _GoogleLogo extends StatelessWidget {
       blendMode: BlendMode.srcIn,
       shaderCallback: (bounds) => const SweepGradient(
         colors: [
-          Color(0xFF4285F4), // biru
           Color(0xFF4285F4),
-          Color(0xFF34A853), // hijau
+          Color(0xFF4285F4),
           Color(0xFF34A853),
-          Color(0xFFFBBC05), // kuning
+          Color(0xFF34A853),
           Color(0xFFFBBC05),
-          Color(0xFFEA4335), // merah
+          Color(0xFFFBBC05),
+          Color(0xFFEA4335),
           Color(0xFFEA4335),
         ],
         stops: [0.0, 0.25, 0.25, 0.5, 0.5, 0.75, 0.75, 1.0],
@@ -87,7 +87,6 @@ class _GoogleLogo extends StatelessWidget {
   }
 }
 
-/// Logo Facebook (lingkaran biru + huruf "f")
 class _FacebookLogo extends StatelessWidget {
   const _FacebookLogo();
 
@@ -117,7 +116,6 @@ class _FacebookLogo extends StatelessWidget {
   }
 }
 
-/// Logo Nomor HP (lingkaran hijau + ikon telepon)
 class _PhoneLogo extends StatelessWidget {
   const _PhoneLogo();
 
