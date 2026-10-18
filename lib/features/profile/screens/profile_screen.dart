@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../core/theme/app_colors.dart';
 import 'login_screen.dart';
 import '../../../core/routing/app_navigation.dart';
@@ -26,25 +28,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
   late TextEditingController _weightController;
   String? _selectedGender;
 
+  // Variabel untuk menyimpan foto profil terpilih
+  File? _profileImage;
+  final ImagePicker _picker = ImagePicker();
+
   bool _isMetricSystem = true;
-  String _selectedLanguage = 'Bahasa Indonesia';
+  String _selectedLanguage = 'English';
   final TextEditingController _helpSearchController = TextEditingController();
 
   final List<Map<String, dynamic>> _faqs = [
     {
-      'title': 'Memulai Aplikasi',
+      'title': 'Getting Started',
       'icon': Icons.rocket_launch_outlined,
       'faqs': [
-        {'q': 'Bagaimana cara mendaftar akun?', 'a': 'Anda dapat mendaftar menggunakan email atau akun Google pada halaman login.'},
-        {'q': 'Bagaimana cara mencatat siklus haid?', 'a': 'Tekan tombol "+" di halaman utama untuk mencatat tanggal mulai dan selesai haid.'},
+        {'q': 'How do I register an account?', 'a': 'You can sign up using your email or Google account on the login page.'},
+        {'q': 'How do I track my period cycle?', 'a': 'Tap the "+" button on the home screen to log your period start and end dates.'},
       ]
     },
     {
-      'title': 'Akun & Data',
+      'title': 'Account & Data',
       'icon': Icons.badge_outlined,
       'faqs': [
-        {'q': 'Bagaimana cara mengubah email?', 'a': 'Buka Edit Profil lalu ubah Email dan tekan Simpan.'},
-        {'q': 'Bagaimana cara menghapus akun?', 'a': 'Buka Pengaturan Privasi > Hapus Akun Saya pada bagian bawah layar.'},
+        {'q': 'How do I change my email?', 'a': 'Go to Edit Profile, update your Email, and tap Save.'},
+        {'q': 'How do I delete my account?', 'a': 'Go to Privacy Settings > Delete My Account at the bottom of the screen.'},
       ]
     },
   ];
@@ -53,7 +59,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
     _isLoggedIn = widget.userData != null;
-    _nameController = TextEditingController(text: widget.userData?['name'] ?? 'Pengguna Lunary');
+    _nameController = TextEditingController(text: widget.userData?['name'] ?? 'Lunary User');
     _emailController = TextEditingController(text: widget.userData?['email'] ?? 'user@lunary.com');
 
     _dobController = TextEditingController();
@@ -70,6 +76,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _weightController.dispose();
     _helpSearchController.dispose();
     super.dispose();
+  }
+
+  // Fungsi untuk mengambil gambar dari galeri
+  Future<void> _pickImage() async {
+    try {
+      final XFile? pickedFile = await _picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 80,
+      );
+
+      if (pickedFile != null) {
+        setState(() {
+          _profileImage = File(pickedFile.path);
+        });
+        _showSnackBar('Profile picture updated successfully!');
+      }
+    } catch (e) {
+      _showSnackBar('Failed to pick image: $e');
+    }
   }
 
   void _showSnackBar(String message) {
@@ -164,7 +189,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             const SizedBox(width: 16),
             const Text(
-              'Pengaturan',
+              'Settings',
               style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.darkText),
             ),
           ],
@@ -184,37 +209,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
             children: [
               _buildMenuItem(
                 icon: Icons.settings_outlined,
-                title: 'Pengaturan aplikasi',
+                title: 'App settings',
                 onTap: () => setState(() => _currentPage = ProfileSubPage.appSettings),
               ),
               _buildMenuItem(
                 icon: Icons.visibility_off_outlined,
-                title: 'Sembunyikan konten',
-                onTap: () => _showSnackBar('Sembunyikan konten ditekan'),
+                title: 'Hide content',
+                onTap: () => _showSnackBar('Hide content tapped'),
               ),
               _buildMenuItem(
                 icon: Icons.bar_chart_rounded,
-                title: 'Grafik & laporan',
-                onTap: () => _showSnackBar('Membuka Grafik & Laporan'),
+                title: 'Charts & reports',
+                onTap: () => _showSnackBar('Opening Charts & Reports'),
               ),
               _buildMenuItem(
                 icon: Icons.water_drop_outlined,
-                title: 'Siklus dan ovulasi',
-                onTap: () => _showSnackBar('Membuka Siklus & Ovulasi'),
+                title: 'Cycle and ovulation',
+                onTap: () => _showSnackBar('Opening Cycle & Ovulation'),
               ),
               _buildMenuItem(
                 icon: Icons.notifications_outlined,
-                title: 'Pengingat',
-                onTap: () => _showSnackBar('Pengingat ditekan'),
+                title: 'Reminders',
+                onTap: () => _showSnackBar('Reminders tapped'),
               ),
               _buildMenuItem(
                 icon: Icons.lock_outline,
-                title: 'Pengaturan privasi',
+                title: 'Privacy settings',
                 onTap: () => setState(() => _currentPage = ProfileSubPage.privacySettings),
               ),
               _buildMenuItem(
                 icon: Icons.help_outline,
-                title: 'Bantuan',
+                title: 'Help Center',
                 showDivider: false,
                 onTap: () => setState(() => _currentPage = ProfileSubPage.help),
               ),
@@ -246,9 +271,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Data Anda dilindungi', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.darkText)),
+                        Text('Your data is protected', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.darkText)),
                         SizedBox(height: 4),
-                        Text('Privasi Anda adalah prioritas utama kami. Data Anda tidak akan pernah dijual dan dapat dihapus kapan pun.',
+                        Text('Your privacy is our top priority. Your data will never be sold and can be deleted at any time.',
                             style: TextStyle(fontSize: 12, color: AppColors.darkerSubText, height: 1.4)),
                       ],
                     ),
@@ -263,8 +288,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     backgroundColor: AppColors.primaryPurple.withOpacity(0.08),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
-                  onPressed: () => _showSnackBar('Pelajari selengkapnya ditekan'),
-                  child: const Text('Pelajari selengkapnya', style: TextStyle(color: AppColors.primaryPurple, fontWeight: FontWeight.w600, fontSize: 13)),
+                  onPressed: () => _showSnackBar('Learn more tapped'),
+                  child: const Text('Learn more', style: TextStyle(color: AppColors.primaryPurple, fontWeight: FontWeight.w600, fontSize: 13)),
                 ),
               ),
             ],
@@ -274,9 +299,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         const Center(
           child: Column(
             children: [
-              Text('Lunary Pelacak Haid & Ovulasi', style: TextStyle(fontSize: 12, color: AppColors.subText)),
+              Text('Lunary Period & Ovulation Tracker', style: TextStyle(fontSize: 12, color: AppColors.subText)),
               SizedBox(height: 2),
-              Text('Versi 1.0.0', style: TextStyle(fontSize: 12, color: AppColors.subText)),
+              Text('Version 1.0.0', style: TextStyle(fontSize: 12, color: AppColors.subText)),
               SizedBox(height: 2),
               Text('© 2026 Lunary Health, Inc.', style: TextStyle(fontSize: 12, color: AppColors.subText)),
             ],
@@ -316,8 +341,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   shape: BoxShape.circle,
                   color: const Color(0xFFB197FC),
                   border: Border.all(color: Colors.white, width: 2.5),
+                  image: _profileImage != null
+                      ? DecorationImage(
+                    image: FileImage(_profileImage!),
+                    fit: BoxFit.cover,
+                  )
+                      : null,
                 ),
-                child: const Center(child: Icon(Icons.person_rounded, color: Colors.white, size: 32)),
+                child: _profileImage == null
+                    ? const Center(child: Icon(Icons.person_rounded, color: Colors.white, size: 32))
+                    : null,
               ),
               Container(
                 padding: const EdgeInsets.all(4),
@@ -367,7 +400,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const SizedBox(width: 12),
             const Expanded(
               child: Text(
-                'Login',
+                'Log in',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -379,7 +412,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         const SizedBox(height: 8),
         const Text(
-          'Masuk atau buat akun untuk menyimpan data siklus haid dan menikmati semua fitur.',
+          'Log in or create an account to back up your cycle data and enjoy all features.',
           style: TextStyle(
             fontSize: 12,
             color: AppColors.darkerSubText,
@@ -400,7 +433,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               if (result != null && result is Map<String, dynamic>) {
                 isUserLoggedIn = true;
                 globalUserData = {
-                  'name': result['name'] ?? 'Pengguna Lunary',
+                  'name': result['name'] ?? 'Lunary User',
                   'email': result['email'] ?? 'user@lunary.com',
                 };
                 setState(() {
@@ -418,7 +451,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               elevation: 0,
             ),
             child: const Text(
-              'Masuk / Daftar Akun',
+              'Log in / Sign up',
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
@@ -435,7 +468,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Column(
       key: const ValueKey('EditProfilePage'),
       children: [
-        _buildSubPageHeader('Edit Profil'),
+        _buildSubPageHeader('Edit Profile'),
         Expanded(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(20.0),
@@ -448,14 +481,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       Container(
                         width: 90,
                         height: 90,
-                        decoration: const BoxDecoration(
+                        decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Color(0xFFD6C7FF),
+                          color: const Color(0xFFD6C7FF),
+                          image: _profileImage != null
+                              ? DecorationImage(
+                            image: FileImage(_profileImage!),
+                            fit: BoxFit.cover,
+                          )
+                              : null,
                         ),
-                        child: const Icon(Icons.person, size: 55, color: Colors.white),
+                        child: _profileImage == null
+                            ? const Icon(Icons.person, size: 55, color: Colors.white)
+                            : null,
                       ),
                       GestureDetector(
-                        onTap: () => _showSnackBar('Pilih foto profil dari galeri'),
+                        onTap: _pickImage, // Memanggil penyeleksi gambar
                         child: Container(
                           padding: const EdgeInsets.all(8),
                           decoration: const BoxDecoration(color: AppColors.primaryPurple, shape: BoxShape.circle),
@@ -467,20 +508,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 const SizedBox(height: 8),
                 GestureDetector(
-                  onTap: () => _showSnackBar('Pilih foto profil dari galeri'),
-                  child: const Text('Ubah Foto Profil', style: TextStyle(color: AppColors.primaryPurple, fontWeight: FontWeight.bold, fontSize: 13)),
+                  onTap: _pickImage, // Memanggil penyeleksi gambar
+                  child: const Text('Change Profile Picture', style: TextStyle(color: AppColors.primaryPurple, fontWeight: FontWeight.bold, fontSize: 13)),
                 ),
                 const SizedBox(height: 28),
 
-                _buildInputField(label: 'Nama Lengkap', controller: _nameController, icon: Icons.person_outline),
+                _buildInputField(label: 'Full Name', controller: _nameController, icon: Icons.person_outline),
                 const SizedBox(height: 16),
                 _buildInputField(label: 'Email', controller: _emailController, icon: Icons.email_outlined, keyboardType: TextInputType.emailAddress),
                 const SizedBox(height: 16),
                 _buildInputField(
-                  label: 'Tanggal Lahir',
+                  label: 'Date of Birth',
                   controller: _dobController,
                   icon: Icons.calendar_today_outlined,
-                  hintText: 'Pilih Tanggal Lahir',
+                  hintText: 'Select Date of Birth',
                   readOnly: true,
                   onTap: () async {
                     DateTime? picked = await showDatePicker(
@@ -501,7 +542,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Jenis Kelamin', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.darkText)),
+                    const Text('Gender', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.darkText)),
                     const SizedBox(height: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
@@ -513,9 +554,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       child: DropdownButtonHideUnderline(
                         child: DropdownButton<String>(
                           value: _selectedGender,
-                          hint: Text('Pilih Jenis Kelamin', style: TextStyle(color: Colors.grey.shade400, fontSize: 14)),
+                          hint: Text('Select Gender', style: TextStyle(color: Colors.grey.shade400, fontSize: 14)),
                           isExpanded: true,
-                          items: ['Wanita', 'Pria'].map((String value) {
+                          items: ['Female', 'Male'].map((String value) {
                             return DropdownMenuItem<String>(value: value, child: Text(value));
                           }).toList(),
                           onChanged: (newValue) => setState(() => _selectedGender = newValue),
@@ -530,20 +571,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   children: [
                     Expanded(
                       child: _buildInputField(
-                        label: 'Tinggi Badan',
+                        label: 'Height',
                         controller: _heightController,
                         icon: Icons.height,
-                        hintText: 'Misal: 160 cm',
+                        hintText: 'e.g. 160 cm',
                         keyboardType: TextInputType.number,
                       ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
                       child: _buildInputField(
-                        label: 'Berat Badan',
+                        label: 'Weight',
                         controller: _weightController,
                         icon: Icons.monitor_weight_outlined,
-                        hintText: 'Misal: 52 kg',
+                        hintText: 'e.g. 52 kg',
                         keyboardType: TextInputType.number,
                       ),
                     ),
@@ -561,9 +602,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     onPressed: () {
                       setState(() => _currentPage = ProfileSubPage.main);
-                      _showSnackBar('Profil berhasil diperbarui!');
+                      _showSnackBar('Profile updated successfully!');
                     },
-                    child: const Text('Simpan Perubahan', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                    child: const Text('Save Changes', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
                   ),
                 ),
               ],
@@ -578,7 +619,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Column(
       key: const ValueKey('AppSettingsPage'),
       children: [
-        _buildSubPageHeader('Pengaturan Aplikasi'),
+        _buildSubPageHeader('App Settings'),
         Expanded(
           child: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
@@ -592,7 +633,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: Column(
                   children: [
                     ListTile(
-                      onTap: () => _showSnackBar('Menghubungkan ke Health Connect...'),
+                      onTap: () => _showSnackBar('Connecting to Health Connect...'),
                       leading: const Icon(Icons.favorite_border, color: AppColors.primaryPurple, size: 24),
                       title: const Text('Health Connect', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.darkText)),
                       trailing: const Icon(Icons.chevron_right, color: Colors.grey, size: 20),
@@ -601,7 +642,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ListTile(
                       onTap: _showLanguageDialog,
                       leading: const Icon(Icons.language, color: AppColors.primaryPurple, size: 24),
-                      title: const Text('Ubah bahasa', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.darkText)),
+                      title: const Text('Change language', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.darkText)),
                       subtitle: Text(_selectedLanguage, style: const TextStyle(fontSize: 12, color: Colors.grey)),
                       trailing: const Icon(Icons.chevron_right, color: Colors.grey, size: 20),
                     ),
@@ -617,11 +658,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 child: SwitchListTile(
                   activeColor: AppColors.primaryPurple,
-                  title: const Text('Sistem metrik (kg, cm)', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.darkText)),
+                  title: const Text('Metric system (kg, cm)', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.darkText)),
                   value: _isMetricSystem,
                   onChanged: (bool value) {
                     setState(() => _isMetricSystem = value);
-                    _showSnackBar(value ? 'Sistem metrik diaktifkan' : 'Sistem imperium diaktifkan');
+                    _showSnackBar(value ? 'Metric system enabled' : 'Imperial system enabled');
                   },
                 ),
               ),
@@ -636,45 +677,45 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Column(
       key: const ValueKey('PrivacySettingsPage'),
       children: [
-        _buildSubPageHeader('Pengaturan Privasi'),
+        _buildSubPageHeader('Privacy Settings'),
         Expanded(
           child: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
             children: [
-              _buildSectionTitle('Umum'),
+              _buildSectionTitle('General'),
               _buildCardContainer([
                 _buildListTile(
                   icon: Icons.shield_outlined,
-                  title: 'Tentang privasi Lunary',
-                  subtitle: 'Lihat cara Lunary menjaga data tetap aman.',
-                  onTap: () => _showSnackBar('Membuka informasi Privasi Lunary'),
+                  title: 'About Lunary privacy',
+                  subtitle: 'See how Lunary keeps your data safe.',
+                  onTap: () => _showSnackBar('Opening Lunary Privacy information'),
                 ),
               ]),
               const SizedBox(height: 20),
-              _buildSectionTitle('Privasi Saya'),
+              _buildSectionTitle('My Privacy'),
               _buildCardContainer([
                 _buildListTile(
                   icon: Icons.info_outline,
-                  title: 'Minta informasi',
-                  subtitle: 'Cari tahu siklus haid dan data kesehatan yang kami simpan.',
-                  onTap: () => _showSnackBar('Permintaan ekspor data terkirim ke email.'),
+                  title: 'Request information',
+                  subtitle: 'Find out what cycle and health data we store.',
+                  onTap: () => _showSnackBar('Data export request sent to email.'),
                 ),
                 _buildListDivider(),
                 _buildListTile(
                   icon: Icons.admin_panel_settings_outlined,
-                  title: 'Kelola persetujuan Anda',
-                  subtitle: 'Pilih dan kontrol opsi privasi Anda.',
-                  onTap: () => _showSnackBar('Membuka Pengaturan Persetujuan Data'),
+                  title: 'Manage your consent',
+                  subtitle: 'Choose and control your privacy options.',
+                  onTap: () => _showSnackBar('Opening Data Consent Settings'),
                 ),
               ]),
               const SizedBox(height: 20),
-              _buildSectionTitle('Keamanan'),
+              _buildSectionTitle('Security'),
               _buildCardContainer([
                 _buildListTile(
                   icon: Icons.lock_outline,
-                  title: 'Kunci aplikasi',
-                  subtitle: 'Atur atau ubah kode sandi untuk melindungi akun Anda.',
-                  onTap: () => _showSnackBar('Membuka pengaturan Kunci Aplikasi'),
+                  title: 'App lock',
+                  subtitle: 'Set or change passcode to protect your account.',
+                  onTap: () => _showSnackBar('Opening App Lock settings'),
                 ),
               ]),
               const SizedBox(height: 20),
@@ -682,9 +723,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 _buildListTile(
                   icon: Icons.delete_outline,
                   iconColor: Colors.redAccent,
-                  title: 'Hapus akun saya',
+                  title: 'Delete my account',
                   titleColor: Colors.redAccent,
-                  subtitle: 'Hapus akun Anda dan semua data secara permanen.',
+                  subtitle: 'Permanently delete your account and all data.',
                   onTap: _showDeleteAccountDialog,
                 ),
               ]),
@@ -699,7 +740,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Column(
       key: const ValueKey('HelpPage'),
       children: [
-        _buildSubPageHeader('Pusat Bantuan'),
+        _buildSubPageHeader('Help Center'),
         Expanded(
           child: ListView(
             padding: const EdgeInsets.all(20),
@@ -712,12 +753,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 child: Column(
                   children: [
-                    const Text('Apa yang bisa kami bantu?', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.darkText)),
+                    const Text('How can we help you?', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.darkText)),
                     const SizedBox(height: 12),
                     TextField(
                       controller: _helpSearchController,
                       decoration: InputDecoration(
-                        hintText: 'Cari topik bantuan...',
+                        hintText: 'Search help topics...',
                         prefixIcon: const Icon(Icons.search, color: AppColors.primaryPurple),
                         filled: true,
                         fillColor: Colors.white,
@@ -904,21 +945,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Pilih Bahasa'),
+        title: const Text('Select Language'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            RadioListTile<String>(
-              title: const Text('Bahasa Indonesia'),
-              value: 'Bahasa Indonesia',
-              groupValue: _selectedLanguage,
-              activeColor: AppColors.primaryPurple,
-              onChanged: (val) {
-                setState(() => _selectedLanguage = val!);
-                Navigator.pop(context);
-                _showSnackBar('Bahasa diubah ke Bahasa Indonesia');
-              },
-            ),
             RadioListTile<String>(
               title: const Text('English'),
               value: 'English',
@@ -928,6 +958,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 setState(() => _selectedLanguage = val!);
                 Navigator.pop(context);
                 _showSnackBar('Language changed to English');
+              },
+            ),
+            RadioListTile<String>(
+              title: const Text('Bahasa Indonesia'),
+              value: 'Bahasa Indonesia',
+              groupValue: _selectedLanguage,
+              activeColor: AppColors.primaryPurple,
+              onChanged: (val) {
+                setState(() => _selectedLanguage = val!);
+                Navigator.pop(context);
+                _showSnackBar('Bahasa diubah ke Bahasa Indonesia');
               },
             ),
           ],
@@ -940,27 +981,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Hapus Akun Saya', style: TextStyle(color: Colors.redAccent)),
-        content: const Text('Apakah Anda yakin? Semua data siklus haid dan riwayat kesehatan Anda akan dihapus secara permanen.'),
+        title: const Text('Delete My Account', style: TextStyle(color: Colors.redAccent)),
+        content: const Text('Are you sure? All of your period cycle data and health history will be permanently deleted.'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Batal')),
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
             onPressed: () {
-              Navigator.pop(context); // Tutup Dialog
+              Navigator.pop(context);
 
-              // Reset status login global & lokal
               isUserLoggedIn = false;
               globalUserData = null;
 
               setState(() {
                 _isLoggedIn = false;
-                _currentPage = ProfileSubPage.main; // Kembali otomatis ke tampilan Profile Utama (Guest)
+                _currentPage = ProfileSubPage.main;
               });
 
-              _showSnackBar('Akun berhasil dihapus.');
+              _showSnackBar('Account deleted successfully.');
             },
-            child: const Text('Hapus', style: TextStyle(color: Colors.white)),
+            child: const Text('Delete', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -968,7 +1008,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   String _getMonthName(int month) {
-    const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     return months[month - 1];
   }
 }
