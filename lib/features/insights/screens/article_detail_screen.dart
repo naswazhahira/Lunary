@@ -24,6 +24,44 @@ class ArticleDetailScreen extends StatelessWidget {
     return minutes < 1 ? 1 : minutes;
   }
 
+  /// Helper untuk menangani gambar lokal (assets/) dan jaringan (http/https)
+  Widget _buildImage(String path, {double? width, double? height, BoxFit fit = BoxFit.cover}) {
+    if (path.startsWith('assets/')) {
+      return Image.asset(
+        path,
+        width: width,
+        height: height,
+        fit: fit,
+        errorBuilder: (_, __, ___) => Container(
+          width: width,
+          height: height,
+          color: AppColors.cycleRingTrack,
+          child: const Icon(Icons.broken_image, color: Colors.grey),
+        ),
+      );
+    }
+    return Image.network(
+      path,
+      width: width,
+      height: height,
+      fit: fit,
+      errorBuilder: (_, __, ___) => Container(
+        width: width,
+        height: height,
+        color: AppColors.cycleRingTrack,
+        child: const Icon(Icons.broken_image, color: Colors.grey),
+      ),
+      loadingBuilder: (context, child, progress) {
+        if (progress == null) return child;
+        return Container(
+          width: width,
+          height: height,
+          color: AppColors.cycleRingTrack,
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final media = MediaQuery.of(context);
@@ -42,16 +80,7 @@ class ArticleDetailScreen extends StatelessWidget {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  Image.network(
-                    article.imageUrl,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) =>
-                        Container(color: AppColors.cycleRingTrack),
-                    loadingBuilder: (context, child, progress) {
-                      if (progress == null) return child;
-                      return Container(color: AppColors.cycleRingTrack);
-                    },
-                  ),
+                  _buildImage(article.imageUrl, fit: BoxFit.cover),
                   // Gradasi tipis supaya tombol kembali tetap terlihat
                   Container(
                     decoration: BoxDecoration(
@@ -224,11 +253,9 @@ class ArticleDetailScreen extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 12),
       child: BounceButton(
         onTap: () {
-          // Daftar rekomendasi artikel baru: semua kecuali dirinya, termasuk artikel ini
           final others = [...relatedArticles, article]
               .where((a) => a != next)
               .toList();
-          // pushReplacement supaya tombol kembali tetap ke layar asal, bukan menumpuk
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
@@ -256,16 +283,11 @@ class ArticleDetailScreen extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(16),
-                child: Image.network(
+                child: _buildImage(
                   next.imageUrl,
                   width: 76,
                   height: 76,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
-                    width: 76,
-                    height: 76,
-                    color: AppColors.cycleRingTrack,
-                  ),
                 ),
               ),
               const SizedBox(width: 14),
@@ -315,7 +337,6 @@ class ArticleDetailScreen extends StatelessWidget {
     );
   }
 
-  /// Mengubah string content menjadi widget: subjudul, bullet, dan paragraf.
   List<Widget> _buildContent(String content) {
     final numbered = RegExp(r'^(\d+)\.\s+(.*)$');
     final blocks = content.split(RegExp(r'\n\s*\n'));
