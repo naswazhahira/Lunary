@@ -22,10 +22,10 @@ class CalendarMonthCard extends StatelessWidget {
   }) : super(key: key);
 
   static const _monthNames = [
-    'JANUARI', 'FEBRUARI', 'MARET', 'APRIL', 'MEI', 'JUNI',
-    'JULI', 'AGUSTUS', 'SEPTEMBER', 'OKTOBER', 'NOVEMBER', 'DESEMBER',
+    'JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
+    'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER',
   ];
-  static const _weekdayLabels = ['MING', 'SEN', 'SEL', 'RAB', 'KAM', 'JUM', 'SAB'];
+  static const _weekdayLabels = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 
   @override
   Widget build(BuildContext context) {
