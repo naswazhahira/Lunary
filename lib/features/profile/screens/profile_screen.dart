@@ -1,12 +1,36 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/providers/cycle_provider.dart';
 import 'login_screen.dart';
 import '../../../core/routing/app_navigation.dart';
 import '../../../core/widgets/app_bottom_nav_bar.dart';
 
 enum ProfileSubPage { main, editProfile, appSettings, privacySettings, help }
+
+/// Data tambahan profil yang disimpan di memori supaya tidak hilang
+/// ketika ProfileScreen dibuat ulang (misalnya saat pindah tab).
+class _ProfileDraft {
+  static String? gender;
+  static String dob = '';
+  static String height = '';
+  static String weight = '';
+  static String? imagePath;
+  static bool isMetric = true;
+  static String language = 'English';
+
+  static void clear() {
+    gender = null;
+    dob = '';
+    height = '';
+    weight = '';
+    imagePath = null;
+    isMetric = true;
+    language = 'English';
+  }
+}
 
 class ProfileScreen extends StatefulWidget {
   final Map<String, String>? userData;
@@ -28,29 +52,51 @@ class _ProfileScreenState extends State<ProfileScreen> {
   late TextEditingController _weightController;
   String? _selectedGender;
 
-  // Variabel untuk menyimpan foto profil terpilih
   File? _profileImage;
   final ImagePicker _picker = ImagePicker();
 
   bool _isMetricSystem = true;
   String _selectedLanguage = 'English';
   final TextEditingController _helpSearchController = TextEditingController();
+  String _helpQuery = '';
+
+  static final RegExp _emailRegex = RegExp(r'^[\w\-.]+@([\w\-]+\.)+[\w\-]{2,}$');
 
   final List<Map<String, dynamic>> _faqs = [
     {
       'title': 'Getting Started',
       'icon': Icons.rocket_launch_outlined,
       'faqs': [
-        {'q': 'How do I register an account?', 'a': 'You can sign up using your email or Google account on the login page.'},
-        {'q': 'How do I track my period cycle?', 'a': 'Tap the "+" button on the home screen to log your period start and end dates.'},
+        {
+          'q': 'How do I register an account?',
+          'a': 'Open the Profile tab, tap "Log in / Sign up", then choose Sign Up and fill in your name, email, and password.'
+        },
+        {
+          'q': 'How do I track my period cycle?',
+          'a': 'Go to the Calendar tab, select the date your period started, and tap "Log Period". Your cycle predictions will update automatically.'
+        },
+        {
+          'q': 'I logged the wrong date. How do I fix it?',
+          'a': 'Tap the first day of your logged period to remove it entirely, or tap the correct start date to replace it.'
+        },
       ]
     },
     {
       'title': 'Account & Data',
       'icon': Icons.badge_outlined,
       'faqs': [
-        {'q': 'How do I change my email?', 'a': 'Go to Edit Profile, update your Email, and tap Save.'},
-        {'q': 'How do I delete my account?', 'a': 'Go to Privacy Settings > Delete My Account at the bottom of the screen.'},
+        {
+          'q': 'How do I change my name or email?',
+          'a': 'Go to Edit Profile, update your name or email, and tap Save Changes.'
+        },
+        {
+          'q': 'How do I log out?',
+          'a': 'Open the Profile tab and tap "Log out" below the settings list.'
+        },
+        {
+          'q': 'How do I delete my account?',
+          'a': 'Go to Privacy Settings > Delete my account. This also removes your logged cycle data.'
+        },
       ]
     },
   ];
@@ -58,13 +104,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
-    _isLoggedIn = widget.userData != null;
-    _nameController = TextEditingController(text: widget.userData?['name'] ?? 'Lunary User');
-    _emailController = TextEditingController(text: widget.userData?['email'] ?? 'user@lunary.com');
 
-    _dobController = TextEditingController();
-    _heightController = TextEditingController();
-    _weightController = TextEditingController();
+    // Status login: dari parameter, atau dari data global kalau parameter kosong
+    _isLoggedIn = widget.userData != null || isUserLoggedIn;
+    final name = widget.userData?['name'] ?? globalUserData?['name'] ?? 'Lunary User';
+    final email = widget.userData?['email'] ?? globalUserData?['email'] ?? 'user@lunary.com';
+
+    _nameController = TextEditingController(text: name);
+    _emailController = TextEditingController(text: email);
+
+    // Data tambahan profil dipulihkan dari memori
+    _dobController = TextEditingController(text: _ProfileDraft.dob);
+    _heightController = TextEditingController(text: _ProfileDraft.height);
+    _weightController = TextEditingController(text: _ProfileDraft.weight);
+    _selectedGender = _ProfileDraft.gender;
+    _isMetricSystem = _ProfileDraft.isMetric;
+    _selectedLanguage = _ProfileDraft.language;
+    if (_ProfileDraft.imagePath != null) {
+      _profileImage = File(_ProfileDraft.imagePath!);
+    }
   }
 
   @override
@@ -78,7 +136,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.dispose();
   }
 
-  // Fungsi untuk mengambil gambar dari galeri
   Future<void> _pickImage() async {
     try {
       final XFile? pickedFile = await _picker.pickImage(
@@ -90,6 +147,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         setState(() {
           _profileImage = File(pickedFile.path);
         });
+        _ProfileDraft.imagePath = pickedFile.path;
         _showSnackBar('Profile picture updated successfully!');
       }
     } catch (e) {
@@ -107,6 +165,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  void _showComingSoon(String feature) => _showSnackBar('$feature is coming soon');
+
   Future<bool> _onWillPop() async {
     if (_currentPage != ProfileSubPage.main) {
       setState(() => _currentPage = ProfileSubPage.main);
@@ -114,6 +174,125 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
     return true;
   }
+
+  // ---------------------------------------------------------------------------
+  // Aksi akun
+  // ---------------------------------------------------------------------------
+
+  void _saveProfile() {
+    final newName = _nameController.text.trim();
+    final newEmail = _emailController.text.trim();
+
+    if (newName.isEmpty) {
+      _showSnackBar('Name cannot be empty');
+      return;
+    }
+    if (!_emailRegex.hasMatch(newEmail)) {
+      _showSnackBar('Please enter a valid email address');
+      return;
+    }
+
+    // Simpan data tambahan profil
+    _ProfileDraft.gender = _selectedGender;
+    _ProfileDraft.dob = _dobController.text;
+    _ProfileDraft.height = _heightController.text.trim();
+    _ProfileDraft.weight = _weightController.text.trim();
+
+    // Sinkronkan ke data global (dibaca Home) dan akun terdaftar (dipakai login)
+    globalUserData = {'name': newName, 'email': newEmail};
+    if (RegisteredAccount.email != null) {
+      RegisteredAccount.email = newEmail;
+      RegisteredAccount.name = newName;
+    }
+
+    setState(() {
+      _nameController.text = newName;
+      _emailController.text = newEmail;
+      _currentPage = ProfileSubPage.main;
+    });
+    _showSnackBar('Profile updated successfully!');
+  }
+
+  void _showLogoutDialog() {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Log out'),
+        content: const Text('Are you sure you want to log out? Your data stays on this device.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('Cancel')),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryPurple),
+            onPressed: () {
+              Navigator.pop(dialogContext);
+
+              isUserLoggedIn = false;
+              globalUserData = null;
+
+              setState(() {
+                _isLoggedIn = false;
+                _currentPage = ProfileSubPage.main;
+              });
+              _showSnackBar('Logged out successfully.');
+            },
+            child: const Text('Log out', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteAccountDialog() {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Delete My Account', style: TextStyle(color: Colors.redAccent)),
+        content: const Text(
+            'Are you sure? All of your period cycle data and health history will be permanently deleted.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('Cancel')),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+            onPressed: () {
+              Navigator.pop(dialogContext);
+
+              // Hapus data siklus
+              context.read<CycleProvider>().clearAllData();
+
+              // Hapus akun terdaftar & status login
+              RegisteredAccount.clear();
+              isUserLoggedIn = false;
+              globalUserData = null;
+
+              // Reset data profil
+              _ProfileDraft.clear();
+
+              setState(() {
+                _isLoggedIn = false;
+                _currentPage = ProfileSubPage.main;
+                _nameController.text = 'Lunary User';
+                _emailController.text = 'user@lunary.com';
+                _dobController.clear();
+                _heightController.clear();
+                _weightController.clear();
+                _selectedGender = null;
+                _profileImage = null;
+                _isMetricSystem = true;
+                _selectedLanguage = 'English';
+              });
+
+              _showSnackBar('Account deleted successfully.');
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Build
+  // ---------------------------------------------------------------------------
 
   @override
   Widget build(BuildContext context) {
@@ -171,26 +350,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
       children: [
         Row(
-          children: [
-            GestureDetector(
-              onTap: () => Navigator.pop(context),
-              child: Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.85),
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(color: AppColors.cardShadow, blurRadius: 8, offset: const Offset(0, 3)),
-                  ],
-                ),
-                child: const Icon(Icons.close_rounded, color: AppColors.darkText, size: 22),
-              ),
-            ),
-            const SizedBox(width: 16),
-            const Text(
-              'Settings',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.darkText),
+          children: const [
+            SizedBox(width: 8),
+            Text(
+              'Profile',
+              style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: AppColors.darkText),
             ),
           ],
         ),
@@ -215,22 +379,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
               _buildMenuItem(
                 icon: Icons.visibility_off_outlined,
                 title: 'Hide content',
-                onTap: () => _showSnackBar('Hide content tapped'),
+                onTap: () => _showComingSoon('Hide content'),
               ),
               _buildMenuItem(
                 icon: Icons.bar_chart_rounded,
                 title: 'Charts & reports',
-                onTap: () => _showSnackBar('Opening Charts & Reports'),
+                onTap: () => _showComingSoon('Charts & reports'),
               ),
               _buildMenuItem(
                 icon: Icons.water_drop_outlined,
                 title: 'Cycle and ovulation',
-                onTap: () => _showSnackBar('Opening Cycle & Ovulation'),
+                onTap: () => _showComingSoon('Cycle & ovulation settings'),
               ),
               _buildMenuItem(
                 icon: Icons.notifications_outlined,
                 title: 'Reminders',
-                onTap: () => _showSnackBar('Reminders tapped'),
+                onTap: () => _showComingSoon('Reminders'),
               ),
               _buildMenuItem(
                 icon: Icons.lock_outline,
@@ -263,7 +427,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 children: [
                   Container(
                     padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(color: AppColors.primaryPurple.withOpacity(0.12), borderRadius: BorderRadius.circular(12)),
+                    decoration: BoxDecoration(
+                        color: AppColors.primaryPurple.withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(12)),
                     child: const Icon(Icons.security_rounded, color: AppColors.primaryPurple, size: 24),
                   ),
                   const SizedBox(width: 12),
@@ -271,9 +437,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Your data is protected', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.darkText)),
+                        Text('Your data is protected',
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.darkText)),
                         SizedBox(height: 4),
-                        Text('Your privacy is our top priority. Your data will never be sold and can be deleted at any time.',
+                        Text(
+                            'Your privacy is our top priority. Your data will never be sold and can be deleted at any time.',
                             style: TextStyle(fontSize: 12, color: AppColors.darkerSubText, height: 1.4)),
                       ],
                     ),
@@ -288,13 +456,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     backgroundColor: AppColors.primaryPurple.withOpacity(0.08),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
-                  onPressed: () => _showSnackBar('Learn more tapped'),
-                  child: const Text('Learn more', style: TextStyle(color: AppColors.primaryPurple, fontWeight: FontWeight.w600, fontSize: 13)),
+                  onPressed: () => setState(() => _currentPage = ProfileSubPage.privacySettings),
+                  child: const Text('Learn more',
+                      style: TextStyle(color: AppColors.primaryPurple, fontWeight: FontWeight.w600, fontSize: 13)),
                 ),
               ),
             ],
           ),
         ),
+        if (_isLoggedIn) ...[
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            height: 46,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryPurple,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              ),
+              onPressed: _showLogoutDialog,
+              child: const Text('Log out',
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white)),
+              ),
+            ),
+        ],
         const SizedBox(height: 24),
         const Center(
           child: Column(
@@ -365,13 +550,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(_nameController.text, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.darkText)),
+              Text(_nameController.text,
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.darkText)),
               const SizedBox(height: 2),
               Text(_emailController.text, style: const TextStyle(fontSize: 13, color: AppColors.darkerSubText)),
               const SizedBox(height: 6),
               GestureDetector(
                 onTap: () => setState(() => _currentPage = ProfileSubPage.editProfile),
-                child: const Text('Edit info', style: TextStyle(fontSize: 13, color: AppColors.primaryPink, fontWeight: FontWeight.bold)),
+                child: const Text('Edit info',
+                    style: TextStyle(fontSize: 13, color: AppColors.primaryPink, fontWeight: FontWeight.bold)),
               ),
             ],
           ),
@@ -479,8 +666,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     alignment: Alignment.bottomRight,
                     children: [
                       Container(
-                        width: 90,
-                        height: 90,
+                        width: 76,
+                        height: 76,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: const Color(0xFFD6C7FF),
@@ -492,11 +679,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               : null,
                         ),
                         child: _profileImage == null
-                            ? const Icon(Icons.person, size: 55, color: Colors.white)
+                            ? const Icon(Icons.person, size: 46, color: Colors.white)
                             : null,
                       ),
                       GestureDetector(
-                        onTap: _pickImage, // Memanggil penyeleksi gambar
+                        onTap: _pickImage,
                         child: Container(
                           padding: const EdgeInsets.all(8),
                           decoration: const BoxDecoration(color: AppColors.primaryPurple, shape: BoxShape.circle),
@@ -508,15 +695,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 const SizedBox(height: 8),
                 GestureDetector(
-                  onTap: _pickImage, // Memanggil penyeleksi gambar
-                  child: const Text('Change Profile Picture', style: TextStyle(color: AppColors.primaryPurple, fontWeight: FontWeight.bold, fontSize: 13)),
+                  onTap: _pickImage,
+                  child: const Text('Change Profile Picture',
+                      style: TextStyle(color: AppColors.primaryPurple, fontWeight: FontWeight.bold, fontSize: 13)),
                 ),
-                const SizedBox(height: 28),
+                const SizedBox(height: 20),
 
                 _buildInputField(label: 'Full Name', controller: _nameController, icon: Icons.person_outline),
-                const SizedBox(height: 16),
-                _buildInputField(label: 'Email', controller: _emailController, icon: Icons.email_outlined, keyboardType: TextInputType.emailAddress),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
+                _buildInputField(
+                    label: 'Email',
+                    controller: _emailController,
+                    icon: Icons.email_outlined,
+                    keyboardType: TextInputType.emailAddress),
+                const SizedBox(height: 12),
                 _buildInputField(
                   label: 'Date of Birth',
                   controller: _dobController,
@@ -537,12 +729,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     }
                   },
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
 
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Gender', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.darkText)),
+                    const Text('Gender',
+                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.darkText)),
                     const SizedBox(height: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
@@ -565,7 +758,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
 
                 Row(
                   children: [
@@ -574,8 +767,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         label: 'Height',
                         controller: _heightController,
                         icon: Icons.height,
-                        hintText: 'e.g. 160 cm',
-                        keyboardType: TextInputType.number,
+                        hintText: _isMetricSystem ? 'e.g. 160 cm' : 'e.g. 5 ft 3 in',
+                        keyboardType: TextInputType.text,
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -584,27 +777,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         label: 'Weight',
                         controller: _weightController,
                         icon: Icons.monitor_weight_outlined,
-                        hintText: 'e.g. 52 kg',
-                        keyboardType: TextInputType.number,
+                        hintText: _isMetricSystem ? 'e.g. 52 kg' : 'e.g. 115 lb',
+                        keyboardType: TextInputType.text,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 16),
 
                 SizedBox(
                   width: double.infinity,
-                  height: 50,
+                  height: 46,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primaryPurple,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                     ),
-                    onPressed: () {
-                      setState(() => _currentPage = ProfileSubPage.main);
-                      _showSnackBar('Profile updated successfully!');
-                    },
-                    child: const Text('Save Changes', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                    onPressed: _saveProfile,
+                    child: const Text('Save Changes',
+                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white)),
                   ),
                 ),
               ],
@@ -633,16 +824,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: Column(
                   children: [
                     ListTile(
-                      onTap: () => _showSnackBar('Connecting to Health Connect...'),
+                      onTap: () => _showComingSoon('Health Connect'),
                       leading: const Icon(Icons.favorite_border, color: AppColors.primaryPurple, size: 24),
-                      title: const Text('Health Connect', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.darkText)),
+                      title: const Text('Health Connect',
+                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.darkText)),
                       trailing: const Icon(Icons.chevron_right, color: Colors.grey, size: 20),
                     ),
                     Divider(height: 1, thickness: 0.5, indent: 52, endIndent: 16, color: Colors.grey.shade200),
                     ListTile(
                       onTap: _showLanguageDialog,
                       leading: const Icon(Icons.language, color: AppColors.primaryPurple, size: 24),
-                      title: const Text('Change language', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.darkText)),
+                      title: const Text('Change language',
+                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.darkText)),
                       subtitle: Text(_selectedLanguage, style: const TextStyle(fontSize: 12, color: Colors.grey)),
                       trailing: const Icon(Icons.chevron_right, color: Colors.grey, size: 20),
                     ),
@@ -658,10 +851,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 child: SwitchListTile(
                   activeColor: AppColors.primaryPurple,
-                  title: const Text('Metric system (kg, cm)', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.darkText)),
+                  title: const Text('Metric system (kg, cm)',
+                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.darkText)),
                   value: _isMetricSystem,
                   onChanged: (bool value) {
                     setState(() => _isMetricSystem = value);
+                    _ProfileDraft.isMetric = value;
                     _showSnackBar(value ? 'Metric system enabled' : 'Imperial system enabled');
                   },
                 ),
@@ -688,7 +883,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   icon: Icons.shield_outlined,
                   title: 'About Lunary privacy',
                   subtitle: 'See how Lunary keeps your data safe.',
-                  onTap: () => _showSnackBar('Opening Lunary Privacy information'),
+                  onTap: () => _showComingSoon('Privacy information'),
                 ),
               ]),
               const SizedBox(height: 20),
@@ -698,14 +893,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   icon: Icons.info_outline,
                   title: 'Request information',
                   subtitle: 'Find out what cycle and health data we store.',
-                  onTap: () => _showSnackBar('Data export request sent to email.'),
+                  onTap: () => _showComingSoon('Data request'),
                 ),
                 _buildListDivider(),
                 _buildListTile(
                   icon: Icons.admin_panel_settings_outlined,
                   title: 'Manage your consent',
                   subtitle: 'Choose and control your privacy options.',
-                  onTap: () => _showSnackBar('Opening Data Consent Settings'),
+                  onTap: () => _showComingSoon('Consent settings'),
                 ),
               ]),
               const SizedBox(height: 20),
@@ -715,20 +910,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   icon: Icons.lock_outline,
                   title: 'App lock',
                   subtitle: 'Set or change passcode to protect your account.',
-                  onTap: () => _showSnackBar('Opening App Lock settings'),
+                  onTap: () => _showComingSoon('App lock'),
                 ),
               ]),
-              const SizedBox(height: 20),
-              _buildCardContainer([
-                _buildListTile(
-                  icon: Icons.delete_outline,
-                  iconColor: Colors.redAccent,
-                  title: 'Delete my account',
-                  titleColor: Colors.redAccent,
-                  subtitle: 'Permanently delete your account and all data.',
-                  onTap: _showDeleteAccountDialog,
-                ),
-              ]),
+              // Hapus akun hanya relevan kalau user sudah login
+              if (_isLoggedIn) ...[
+                const SizedBox(height: 20),
+                _buildCardContainer([
+                  _buildListTile(
+                    icon: Icons.delete_outline,
+                    iconColor: Colors.redAccent,
+                    title: 'Delete my account',
+                    titleColor: Colors.redAccent,
+                    subtitle: 'Permanently delete your account and all data.',
+                    onTap: _showDeleteAccountDialog,
+                  ),
+                ]),
+              ],
             ],
           ),
         ),
@@ -737,6 +935,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildHelpPage() {
+    final query = _helpQuery.trim().toLowerCase();
+
+    // Filter FAQ berdasarkan kata kunci di pertanyaan atau jawaban
+    final List<Map<String, dynamic>> visibleCategories = [];
+    for (final category in _faqs) {
+      final matches = (category['faqs'] as List).where((faq) {
+        if (query.isEmpty) return true;
+        return faq['q'].toString().toLowerCase().contains(query) ||
+            faq['a'].toString().toLowerCase().contains(query);
+      }).toList();
+      if (matches.isNotEmpty) {
+        visibleCategories.add({
+          'title': category['title'],
+          'icon': category['icon'],
+          'faqs': matches,
+        });
+      }
+    }
+
     return Column(
       key: const ValueKey('HelpPage'),
       children: [
@@ -753,13 +970,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 child: Column(
                   children: [
-                    const Text('How can we help you?', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.darkText)),
+                    const Text('How can we help you?',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.darkText)),
                     const SizedBox(height: 12),
                     TextField(
                       controller: _helpSearchController,
+                      onChanged: (value) => setState(() => _helpQuery = value),
                       decoration: InputDecoration(
                         hintText: 'Search help topics...',
                         prefixIcon: const Icon(Icons.search, color: AppColors.primaryPurple),
+                        suffixIcon: _helpQuery.isNotEmpty
+                            ? IconButton(
+                          icon: const Icon(Icons.close, size: 18),
+                          onPressed: () {
+                            _helpSearchController.clear();
+                            setState(() => _helpQuery = '');
+                          },
+                        )
+                            : null,
                         filled: true,
                         fillColor: Colors.white,
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
@@ -770,7 +998,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
               const SizedBox(height: 20),
-              ..._faqs.map((category) {
+              if (visibleCategories.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 32),
+                  child: Center(
+                    child: Text('No help topics found.',
+                        style: TextStyle(fontSize: 13, color: AppColors.darkerSubText)),
+                  ),
+                ),
+              ...visibleCategories.map((category) {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -780,7 +1016,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         children: [
                           Icon(category['icon'] as IconData, size: 18, color: AppColors.primaryPurple),
                           const SizedBox(width: 8),
-                          Text(category['title'].toString(), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.darkText)),
+                          Text(category['title'].toString(),
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.darkText)),
                         ],
                       ),
                     ),
@@ -794,11 +1032,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       child: Column(
                         children: (category['faqs'] as List).map<Widget>((faq) {
                           return ExpansionTile(
-                            title: Text(faq['q'].toString(), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.darkText)),
+                            title: Text(faq['q'].toString(),
+                                style: const TextStyle(
+                                    fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.darkText)),
                             children: [
                               Padding(
                                 padding: const EdgeInsets.only(left: 16, right: 16, bottom: 12),
-                                child: Text(faq['a'].toString(), style: const TextStyle(fontSize: 12, color: AppColors.darkerSubText, height: 1.4)),
+                                child: Text(faq['a'].toString(),
+                                    style: const TextStyle(
+                                        fontSize: 12, color: AppColors.darkerSubText, height: 1.4)),
                               ),
                             ],
                           );
@@ -817,7 +1059,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildSubPageHeader(String title) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      height: 52,
+      padding: const EdgeInsets.symmetric(horizontal: 8),
       decoration: const BoxDecoration(
         color: Colors.white,
         border: Border(bottom: BorderSide(color: Color(0xFFEEEEEE), width: 1)),
@@ -825,17 +1068,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Row(
         children: [
           IconButton(
-            icon: const Icon(Icons.arrow_back, color: AppColors.darkText),
+            icon: const Icon(Icons.arrow_back, color: AppColors.darkText, size: 22),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
             onPressed: () => setState(() => _currentPage = ProfileSubPage.main),
           ),
           Expanded(
             child: Text(
               title,
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.darkText),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.darkText),
             ),
           ),
-          const SizedBox(width: 48),
+          const SizedBox(width: 40),
         ],
       ),
     );
@@ -852,7 +1097,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ListTile(
           onTap: onTap,
           leading: Icon(icon, color: AppColors.primaryPurple, size: 22),
-          title: Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.darkText)),
+          title: Text(title,
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.darkText)),
           trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.subText, size: 20),
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
         ),
@@ -889,9 +1135,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
             fillColor: Colors.white,
             prefixIcon: Icon(icon, color: AppColors.primaryPurple),
             contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade300)),
-            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade300)),
-            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.primaryPurple, width: 2)),
+            border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade300)),
+            enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade300)),
+            focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppColors.primaryPurple, width: 2)),
           ),
         ),
       ],
@@ -930,7 +1180,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }) {
     return ListTile(
       onTap: onTap,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       leading: Icon(icon, color: iconColor, size: 24),
       title: Text(title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: titleColor)),
       subtitle: Padding(
@@ -944,7 +1194,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void _showLanguageDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Select Language'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -956,7 +1206,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               activeColor: AppColors.primaryPurple,
               onChanged: (val) {
                 setState(() => _selectedLanguage = val!);
-                Navigator.pop(context);
+                _ProfileDraft.language = val!;
+                Navigator.pop(dialogContext);
                 _showSnackBar('Language changed to English');
               },
             ),
@@ -967,7 +1218,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               activeColor: AppColors.primaryPurple,
               onChanged: (val) {
                 setState(() => _selectedLanguage = val!);
-                Navigator.pop(context);
+                _ProfileDraft.language = val!;
+                Navigator.pop(dialogContext);
                 _showSnackBar('Bahasa diubah ke Bahasa Indonesia');
               },
             ),
@@ -977,38 +1229,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  void _showDeleteAccountDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete My Account', style: TextStyle(color: Colors.redAccent)),
-        content: const Text('Are you sure? All of your period cycle data and health history will be permanently deleted.'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
-            onPressed: () {
-              Navigator.pop(context);
-
-              isUserLoggedIn = false;
-              globalUserData = null;
-
-              setState(() {
-                _isLoggedIn = false;
-                _currentPage = ProfileSubPage.main;
-              });
-
-              _showSnackBar('Account deleted successfully.');
-            },
-            child: const Text('Delete', style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
-    );
-  }
-
   String _getMonthName(int month) {
-    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const months = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
     return months[month - 1];
   }
 }
