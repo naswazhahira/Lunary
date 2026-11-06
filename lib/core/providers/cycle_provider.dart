@@ -10,6 +10,10 @@ class CycleProvider extends ChangeNotifier {
   static const int periodLength = 7;
   static const int lutealPhaseLength = 14;
 
+  /// Jarak maksimal (hari) dari awal blok lama agar tap dianggap "koreksi",
+  /// bukan siklus baru.
+  static const int correctionWindowDays = 10;
+
   final Set<DateTime> loggedPeriodDates = {};
   DateTime _selectedMonth = DateTime(DateTime.now().year, DateTime.now().month);
   DateTime _selectedDate = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
@@ -38,47 +42,92 @@ class CycleProvider extends ChangeNotifier {
 
   bool get canTrackSelectedDate => !_selectedDate.isAfter(_normalize(DateTime.now()));
 
-  /// Cek apakah ada catatan haid di sekitar tanggal yang dipilih
-  bool _hasNearbyPeriod(DateTime date) {
-    for (int offset = -periodLength; offset <= periodLength; offset++) {
-      if (loggedPeriodDates.contains(date.add(Duration(days: offset)))) {
-        return true;
+  /// Kelompokkan tanggal yang dicatat menjadi blok-blok berurutan.
+  List<List<DateTime>> _periodBlocks() {
+    final days = loggedPeriodDates.toList()..sort();
+    final blocks = <List<DateTime>>[];
+    for (final day in days) {
+      if (blocks.isNotEmpty && day.difference(blocks.last.last).inDays == 1) {
+        blocks.last.add(day);
+      } else {
+        blocks.add([day]);
       }
     }
-    return false;
+    return blocks;
+  }
+
+  /// Tambahkan blok haid mulai dari [start] sepanjang periodLength hari
+  /// (tidak melewati hari ini).
+  void _addPeriodBlock(DateTime start) {
+    final today = _normalize(DateTime.now());
+    final rawEnd = start.add(const Duration(days: periodLength - 1));
+    final end = rawEnd.isAfter(today) ? today : rawEnd;
+
+    DateTime cursor = start;
+    while (!cursor.isAfter(end)) {
+      loggedPeriodDates.add(cursor);
+      cursor = cursor.add(const Duration(days: 1));
+    }
   }
 
   void togglePeriodForSelectedDate() {
     if (!canTrackSelectedDate) return;
+    final date = _selectedDate;
 
-    if (loggedPeriodDates.contains(_selectedDate)) {
-      loggedPeriodDates.remove(_selectedDate);
-    } else {
-      if (_hasNearbyPeriod(_selectedDate)) {
-        loggedPeriodDates.add(_selectedDate);
-      } else {
-        final start = _selectedDate;
-        final today = _normalize(DateTime.now());
-        final rawEnd = start.add(const Duration(days: periodLength - 1));
-        final end = rawEnd.isAfter(today) ? today : rawEnd;
-
-        DateTime cursor = start;
-        while (!cursor.isAfter(end)) {
-          loggedPeriodDates.add(cursor);
-          cursor = cursor.add(const Duration(days: 1));
-        }
+    // Cari blok lama yang berkaitan dengan tanggal ini
+    List<DateTime>? target;
+    for (final block in _periodBlocks()) {
+      final inside = !date.isBefore(block.first) && !date.isAfter(block.last);
+      final near = date.difference(block.first).inDays.abs() <= correctionWindowDays;
+      final adjacentAfter = date.difference(block.last).inDays == 1;
+      if (inside || near || adjacentAfter) {
+        target = block;
+        break;
       }
     }
+
+    if (target != null) {
+      final oldStart = target.first;
+      final oldEnd = target.last;
+      final isStart = date == oldStart;
+      final isInside = !date.isBefore(oldStart) && !date.isAfter(oldEnd);
+      final isAdjacentAfter = date.difference(oldEnd).inDays == 1;
+
+      if (isStart) {
+        // Tap tanggal awal = undo seluruh blok
+        loggedPeriodDates.removeAll(target);
+        notifyListeners();
+        return;
+      }
+
+      if (isInside) {
+        for (final d in target) {
+          if (!d.isAfter(date)) loggedPeriodDates.remove(d);
+        }
+        notifyListeners();
+        return;
+      }
+
+      if (isAdjacentAfter) {
+        loggedPeriodDates.add(date);
+        notifyListeners();
+        return;
+      }
+
+      loggedPeriodDates.removeAll(target);
+    }
+
+    _addPeriodBlock(date);
     notifyListeners();
   }
 
   void logPeriodToday() {
-    final today = _normalize(DateTime.now());
-    if (loggedPeriodDates.contains(today)) {
-      loggedPeriodDates.remove(today);
-    } else {
-      loggedPeriodDates.add(today);
-    }
+    selectDate(DateTime.now());
+    togglePeriodForSelectedDate();
+  }
+
+  void clearAllData() {
+    loggedPeriodDates.clear();
     notifyListeners();
   }
 
@@ -271,7 +320,11 @@ class CycleProvider extends ChangeNotifier {
     final ovulationOffset = averageCycleLength - lutealPhaseLength;
 
     // Rentang Prediksi Haid
-    if (cycleOffset < periodLength) return CalendarDayType.predictPeriod;
+    if (cycleOffset < periodLength) {
+      return diffDays >= averageCycleLength
+          ? CalendarDayType.predictPeriod
+          : CalendarDayType.none;
+    }
 
     // Rentang Masa Subur (Fertile Window)
     if (cycleOffset >= ovulationOffset - 4 && cycleOffset <= ovulationOffset + 1) {
