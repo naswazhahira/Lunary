@@ -154,6 +154,12 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
+  String _displayName() {
+    final fullName = (globalUserData?['name'] ?? '').trim();
+    if (!isUserLoggedIn || fullName.isEmpty) return 'There!';
+    return fullName.split(' ').first;
+  }
+
   Widget _buildHeader(BuildContext context, CycleProvider cycle) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -164,7 +170,7 @@ class HomeScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('Hi, Awa', style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: AppColors.darkText, letterSpacing: -0.5, height: 1.1)),
+              Text('Hi, ${_displayName()}!', style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: AppColors.darkText, letterSpacing: -0.5, height: 1.1)),
               const SizedBox(height: 8),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
