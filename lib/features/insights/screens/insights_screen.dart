@@ -119,7 +119,6 @@ By tracking your dates, symptoms, and personal experiences, you can develop a cl
               ),
             ],
           ),
-          // Kategori lama yang tidak ada di GDocs tetap dipertahankan
           InsightCategory(
             title: "Hormones & Balance",
             bannerImage: "assets/images/hormone_balance.jpeg",
@@ -141,15 +140,42 @@ By tracking your dates, symptoms, and personal experiences, you can develop a cl
             ],
           ),
           InsightCategory(
-            title: "Cervical Mucus & Fertile Window",
+            title: "Menstrual Duration Variability",
             bannerImage: "assets/images/cervical_mucus.jpeg",
             articles: [
               Article(
-                title: "How to Identify Your Fertile Window Through Cervical Mucus",
-                summary: "A practical guide to observing the texture and consistency of daily vaginal discharge.",
-                content: "Cervical mucus is produced by the cervix and changes significantly in texture throughout the cycle due to the effects of estrogen:\n\n- After Menstruation (Days 1–3 after your period): The vagina feels fairly dry and there is little to no mucus.\n- Pre-Ovulation Phase: Mucus begins to appear, cloudy, slightly sticky, or with a creamy texture.\n- Peak Fertility (During Ovulation): Mucus becomes clear, slippery, and can be stretched several centimeters without breaking (similar to raw egg white).\n\nThis clear, slippery mucus provides nutrients and helps sperm swim toward the egg. After ovulation is over, the mucus becomes thick again or dries up.",
+                title: "Why Does Period Duration Vary Between 3 to 7 Days?",
+                summary: "Learn why menstrual bleeding length varies from person to person, what is considered clinically normal, and what medical research says.",
+                content: """Introduction
+Have you ever wondered why your period lasts for 3 days while someone else experiences bleeding for 7 days? 
+
+Menstrual duration variability is a completely normal physiological phenomenon. According to global reproductive health standards, a normal period duration ranges anywhere from 2 to 8 days (averaging 3 to 7 days). Both 3-day and 7-day cycles fall comfortably within the medically healthy spectrum.
+
+Why Does the Duration Vary?
+1. Hormonal Dynamics (Estrogen & Progesterone)
+Estrogen dictates how thick the endometrial lining builds up during the follicular phase, while progesterone stabilizes it. Variations in hormone levels directly affect how much tissue is shed during menstruation.
+
+2. Fibrinolytic Enzyme Activity
+The uterus produces natural fibrinolytic enzymes that regulate blood clotting and how rapidly the lining breaks down and exits the body.
+
+3. Reproductive Age & Stages
+Cycle duration naturally fluctuates during adolescence (shortly after menarche) and perimenopause due to changing ovulation patterns.
+
+4. Lifestyle & Biological Factors
+Stress levels, Body Mass Index (BMI), nutrition, and physical activity play significant roles in subtle cycle variations.
+
+Clinical Terms to Know:
+- Normal Duration: Bleeding lasting between 2 to 8 days.
+- Oligomenorrhea: Unusually short or infrequent bleeding (less than 2 days).
+- Menorrhagia: Excessive or prolonged bleeding lasting more than 8 days.
+
+When to Consult a Doctor?
+While 3 to 7 days is normal, sudden drastic changes in your typical pattern, bleeding for more than 8 days, or experiencing severe pain should be evaluated by a healthcare professional.
+
+Final Thoughts
+Every body has its own unique rhythm. Tracking your cycle helps you understand your personal baseline duration rather than comparing yourself to others.""",
                 imageUrl: "assets/images/cervical2.jpeg",
-                category: "Cervical Mucus & Fertile Window",
+                category: "Menstrual Duration Variability",
               ),
             ],
           ),
@@ -249,7 +275,6 @@ A late period can have many explanations, and one delayed cycle does not automat
               ),
             ],
           ),
-          // Kategori Spotting tidak ada di GDocs, tetap dipertahankan
           InsightCategory(
             title: "Spotting vs Normal Flow",
             bannerImage: "assets/images/spotting.jpeg",
@@ -267,7 +292,6 @@ A late period can have many explanations, and one delayed cycle does not automat
             title: "Heavy Bleeding (Menorrhagia)",
             bannerImage: "assets/images/heavy_bleeding.jpeg",
             articles: [
-              // Di-update penuh dari GDocs
               Article(
                 title: "Heavy Menstrual Bleeding (Menorrhagia) — Signs, Causes, and Treatment",
                 summary: "Bleeding that is unusually heavy, lasts longer than expected, or interferes with everyday activities may indicate a condition that deserves medical attention.",
@@ -326,7 +350,6 @@ Heavy menstrual bleeding can affect both your physical health and your quality o
             title: "Relieving Period Cramps",
             bannerImage: "assets/images/cramps.jpeg",
             articles: [
-              // Menggabungkan seluruh materi relaksasi & kram dari GDocs ke dalam 2 artikel lengkap
               Article(
                 title: "Relieving Period Discomfort — A Guide to Feeling Better During Your Period",
                 summary: "Several simple self-care practices may help reduce discomfort and make your period easier to manage.",
@@ -390,7 +413,6 @@ Seek medical advice if cramps regularly prevent you from attending school or wor
             title: "Managing Mood Swings",
             bannerImage: "assets/images/moodSwing.jpeg",
             articles: [
-              // Di-update dari GDocs
               Article(
                 title: "Managing Mood Swings Before and During Your Period",
                 summary: "Understand PMS emotional symptoms and discover strategies like sleep protection, stress management, and clear communication to navigate mood changes.",
@@ -419,7 +441,6 @@ If mood symptoms consistently interfere with relationships, academic performance
             title: "Nutrition & Diet Tips",
             bannerImage: "https://images.unsplash.com/photo-1498837167922-ddd27525d352?q=80&w=600&auto=format&fit=crop",
             articles: [
-              // Di-update dari GDocs
               Article(
                 title: "Nutrition and Diet Tips for a Healthier Menstrual Cycle",
                 summary: "Focus on building consistent eating habits rich in iron, complex carbs, protein, calcium, and hydration to support your energy and digestion.",
@@ -449,7 +470,6 @@ Example of a Balanced Day of Eating:
             title: "Exercise & Stretches",
             bannerImage: "assets/images/Calm.jpeg",
             articles: [
-              // Di-update dari GDocs
               Article(
                 title: "Exercises and Stretches to Help You Feel Better During Your Period",
                 summary: "Discover low-impact movements like walking, Child's Pose, Cat-Cow, and pelvic tilts to relieve muscle stiffness and pelvic tension.",
