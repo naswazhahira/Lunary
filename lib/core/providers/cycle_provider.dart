@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../features/calendar/models/calendar_day.dart';
+import '../services/cycle_settings.dart';
 
 /// Fase siklus pada hari ini.
 enum CyclePhase { none, period, follicular, fertile, luteal }
@@ -9,6 +10,15 @@ class CycleProvider extends ChangeNotifier {
   static const int averageCycleLength = 28;
   static const int periodLength = 7;
   static const int lutealPhaseLength = 14;
+
+  /// Nilai efektif: pakai pengaturan user (survei / Profile) kalau ada,
+  /// kalau kosong pakai angka umum (7 / 28 / 14).
+  int get periodDays => CycleSettings.periodLength ?? periodLength;
+  int get cycleDays => CycleSettings.cycleLength ?? averageCycleLength;
+  int get lutealDays => CycleSettings.lutealPhase ?? lutealPhaseLength;
+
+  /// Panggil setelah pengaturan siklus di Profile berubah agar layar ikut refresh.
+  void onSettingsChanged() => notifyListeners();
 
   /// Jarak maksimal (hari) dari awal blok lama agar tap dianggap "koreksi",
   /// bukan siklus baru.
@@ -56,11 +66,11 @@ class CycleProvider extends ChangeNotifier {
     return blocks;
   }
 
-  /// Tambahkan blok haid mulai dari [start] sepanjang periodLength hari
+  /// Tambahkan blok haid mulai dari [start] sepanjang periodDays hari
   /// (tidak melewati hari ini).
   void _addPeriodBlock(DateTime start) {
     final today = _normalize(DateTime.now());
-    final rawEnd = start.add(const Duration(days: periodLength - 1));
+    final rawEnd = start.add(Duration(days: periodDays - 1));
     final end = rawEnd.isAfter(today) ? today : rawEnd;
 
     DateTime cursor = start;
@@ -155,10 +165,10 @@ class CycleProvider extends ChangeNotifier {
     if (start == null) return null;
 
     final today = _normalize(DateTime.now());
-    DateTime ovDate = start.add(Duration(days: averageCycleLength - lutealPhaseLength));
+    DateTime ovDate = start.add(Duration(days: cycleDays - lutealDays));
 
     while (ovDate.isBefore(today)) {
-      ovDate = ovDate.add(const Duration(days: averageCycleLength));
+      ovDate = ovDate.add(Duration(days: cycleDays));
     }
     return ovDate;
   }
@@ -169,10 +179,10 @@ class CycleProvider extends ChangeNotifier {
     if (start == null) return null;
 
     final today = _normalize(DateTime.now());
-    DateTime nextStart = start.add(const Duration(days: averageCycleLength));
+    DateTime nextStart = start.add(Duration(days: cycleDays));
 
     while (nextStart.isBefore(today)) {
-      nextStart = nextStart.add(const Duration(days: averageCycleLength));
+      nextStart = nextStart.add(Duration(days: cycleDays));
     }
     return nextStart;
   }
@@ -190,8 +200,8 @@ class CycleProvider extends ChangeNotifier {
     if (loggedPeriodDates.contains(today)) return CyclePhase.period;
     if (lastPeriodStartDate == null) return CyclePhase.none;
 
-    final offset = (currentCycleDay - 1) % averageCycleLength;
-    final ovulationOffset = averageCycleLength - lutealPhaseLength;
+    final offset = (currentCycleDay - 1) % cycleDays;
+    final ovulationOffset = cycleDays - lutealDays;
 
     if (offset >= ovulationOffset - 4 && offset <= ovulationOffset + 1) {
       return CyclePhase.fertile;
@@ -229,12 +239,12 @@ class CycleProvider extends ChangeNotifier {
     }
   }
 
-  /// Progress ring berdasarkan seluruh siklus (hari ke-N dari 28).
+  /// Progress ring berdasarkan seluruh siklus (hari ke-N dari panjang siklus).
   /// Tidak dipakai lagi oleh ring Home, dipertahankan kalau ada yang masih memakainya.
   double get ringProgress {
     if (!hasCycleData) return 0;
-    final dayInCycle = ((currentCycleDay - 1) % averageCycleLength) + 1;
-    return dayInCycle / averageCycleLength;
+    final dayInCycle = ((currentCycleDay - 1) % cycleDays) + 1;
+    return dayInCycle / cycleDays;
   }
 
   /// Progress ring Home per FASE: hari ke-N di fase ini / panjang fase ini.
@@ -243,38 +253,39 @@ class CycleProvider extends ChangeNotifier {
   double get phaseProgress {
     if (!hasCycleData) return 0;
 
-    final dayInCycle = ((currentCycleDay - 1) % averageCycleLength) + 1; // 1..28
-    final ovulationOffset = averageCycleLength - lutealPhaseLength;      // 14
+    final dayInCycle = ((currentCycleDay - 1) % cycleDays) + 1; // 1..panjang siklus
+    final ovulationOffset = cycleDays - lutealDays;
 
     // Hari siklus (1-based), diturunkan dari rentang offset di currentPhase
-    final fertileStart = ovulationOffset - 4 + 1; // hari 11
-    final fertileEnd = ovulationOffset + 1 + 1;   // hari 16
-    final lutealStart = fertileEnd + 1;           // hari 17
+    final fertileStart = ovulationOffset - 4 + 1;
+    final fertileEnd = ovulationOffset + 1 + 1;
+    final lutealStart = fertileEnd + 1;
 
     int start = 1;
-    int length = periodLength;
+    int length = periodDays;
 
     switch (currentPhase) {
       case CyclePhase.none:
         return 0;
       case CyclePhase.period:
         start = 1;
-        length = periodLength; // 7
+        length = periodDays;
         break;
       case CyclePhase.follicular:
-        start = periodLength + 1;        // hari 8
-        length = fertileStart - start;   // 3 hari
+        start = periodDays + 1;
+        length = fertileStart - start;
         break;
       case CyclePhase.fertile:
         start = fertileStart;
-        length = fertileEnd - fertileStart + 1; // 6 hari
+        length = fertileEnd - fertileStart + 1;
         break;
       case CyclePhase.luteal:
         start = lutealStart;
-        length = averageCycleLength - lutealStart + 1; // 12 hari
+        length = cycleDays - lutealStart + 1;
         break;
     }
 
+    if (length < 1) length = 1;
     final dayInPhase = dayInCycle - start + 1;
     return (dayInPhase / length).clamp(0.0, 1.0);
   }
@@ -295,13 +306,14 @@ class CycleProvider extends ChangeNotifier {
     return diff < 0 ? 0 : diff;
   }
 
-  double get periodFraction => periodLength / averageCycleLength;
-  double get lutealFraction => lutealPhaseLength / averageCycleLength;
-  double get fertileFraction => 5 / averageCycleLength;
-  double get follicularFraction => 1 - periodFraction - fertileFraction - lutealFraction;
+  double get periodFraction => periodDays / cycleDays;
+  double get lutealFraction => lutealDays / cycleDays;
+  double get fertileFraction => 5 / cycleDays;
+  double get follicularFraction =>
+      (1 - periodFraction - fertileFraction - lutealFraction).clamp(0.0, 1.0);
 
-  double get todayCycleProgress => ((currentCycleDay - 1) % averageCycleLength) / averageCycleLength;
-  double get ovulationCycleProgress => (averageCycleLength - lutealPhaseLength) / averageCycleLength;
+  double get todayCycleProgress => ((currentCycleDay - 1) % cycleDays) / cycleDays;
+  double get ovulationCycleProgress => (cycleDays - lutealDays) / cycleDays;
 
   /// Tipe hari (haid / prediksi haid / masa subur / biasa) untuk tanggal mana pun.
   /// Dipakai oleh Calendar dan strip mingguan di Home.
@@ -316,12 +328,12 @@ class CycleProvider extends ChangeNotifier {
     final diffDays = d.difference(baseStart).inDays;
     if (diffDays <= 0) return CalendarDayType.none;
 
-    final cycleOffset = diffDays % averageCycleLength;
-    final ovulationOffset = averageCycleLength - lutealPhaseLength;
+    final cycleOffset = diffDays % cycleDays;
+    final ovulationOffset = cycleDays - lutealDays;
 
     // Rentang Prediksi Haid
-    if (cycleOffset < periodLength) {
-      return diffDays >= averageCycleLength
+    if (cycleOffset < periodDays) {
+      return diffDays >= cycleDays
           ? CalendarDayType.predictPeriod
           : CalendarDayType.none;
     }
@@ -345,7 +357,7 @@ class CycleProvider extends ChangeNotifier {
     final diffDays = d.difference(baseStart).inDays;
     if (diffDays <= 0) return false;
 
-    return diffDays % averageCycleLength == (averageCycleLength - lutealPhaseLength);
+    return diffDays % cycleDays == (cycleDays - lutealDays);
   }
 
   /// Render Kalender Keseluruhan (Masa Lalu, Sekarang, & Prediksi Berulang di Masa Depan)
