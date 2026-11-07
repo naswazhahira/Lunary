@@ -5,6 +5,8 @@ import '../../features/insights/screens/insights_screen.dart';
 import '../../features/profile/screens/profile_screen.dart';
 import '../../features/profile/screens/login_screen.dart';
 import '../../features/lunary_ai/screens/lunary_ai_screen.dart';
+import '../../features/survey/screens/cycle_survey_screen.dart';
+import '../services/cycle_settings.dart';
 
 enum AppNavTab {
   cycle,
@@ -67,6 +69,21 @@ void checkAuthAndExecute(BuildContext context, {required VoidCallback onSuccess}
   }
 }
 
+/// Dipanggil setelah login/register berhasil.
+/// Memuat pengaturan siklus milik akun, lalu menampilkan survei kalau akun ini
+/// belum pernah melihatnya (sekali per akun).
+/// Return true kalau survei baru saja ditampilkan (diisi atau dilewati).
+Future<bool> showSurveyIfNeeded(BuildContext context, String email) async {
+  await CycleSettings.loadFor(email);
+  final done = await CycleSettings.isSurveyDone(email);
+  if (done || !context.mounted) return false;
+
+  await Navigator.of(context).push(
+    MaterialPageRoute(builder: (_) => const CycleSurveyScreen()),
+  );
+  return true;
+}
+
 // Login / Register prompt pop-up
 void showLoginRequiredDialog(BuildContext context) {
   showDialog(
@@ -104,8 +121,17 @@ void showLoginRequiredDialog(BuildContext context) {
                 'email': result['email'] ?? 'user@lunary.com',
               };
 
-              // Open the Profile page to show the latest login status
-              if (context.mounted) {
+              if (!context.mounted) return;
+
+              // Survei siklus (sekali per akun)
+              final surveyShown = await showSurveyIfNeeded(context, globalUserData!['email']!);
+              if (!context.mounted) return;
+
+              if (surveyShown) {
+                // Setelah survei (diisi / dilewati) langsung ke beranda
+                handleAppNavTap(context, AppNavTab.cycle);
+              } else {
+                // Open the Profile page to show the latest login status
                 Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (_) => ProfileScreen(userData: globalUserData),
