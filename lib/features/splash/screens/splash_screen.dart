@@ -3,6 +3,10 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import 'package:lunary/features/home/screens/home_screen.dart';
+import '../../../core/services/cycle_settings.dart';
+import 'package:provider/provider.dart';
+import '../../../core/providers/cycle_provider.dart';
+import '../../survey/screens/cycle_survey_screen.dart';
 import '../widgets/crescent_mark_painter.dart';
 import '../widgets/cycle_ring_painter.dart';
 
@@ -23,6 +27,7 @@ class _SplashScreenState extends State<SplashScreen>
   static const Color whiteColor = Colors.white;            // Putih
 
   late AnimationController _controller;
+  Timer? _navTimer;
 
   // animasi
   late Animation<double> _dotsRotation;
@@ -135,18 +140,36 @@ class _SplashScreenState extends State<SplashScreen>
 
     _controller.forward();
 
-    // Navigasi otomatis ke HomeScreen saat animasi selesai
-    Timer(const Duration(milliseconds: 5500), () {
-      if (mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => HomeScreen()),
-        );
-      }
-    });
+    // Setelah animasi selesai: survei (kalau belum pernah) atau langsung Home
+    _navTimer = Timer(const Duration(milliseconds: 5500), _goNext);
+  }
+
+  Future<void> _goNext() async {
+    await CycleSettings.loadGuest();
+    final surveyDone = await CycleSettings.isSurveyDone(CycleSettings.guestId);
+    if (!mounted) return;
+
+    // Isi CycleProvider dengan tanggal haid yang tersimpan
+    context.read<CycleProvider>().reloadFromSettings();
+
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (routeContext) => surveyDone
+            ? const HomeScreen()
+            : CycleSurveyScreen(
+          onFinished: () {
+            Navigator.of(routeContext).pushReplacement(
+              MaterialPageRoute(builder: (_) => const HomeScreen()),
+            );
+          },
+        ),
+      ),
+    );
   }
 
   @override
   void dispose() {
+    _navTimer?.cancel();
     _controller.dispose();
     super.dispose();
   }
