@@ -591,13 +591,20 @@ class _ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserv
           TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('Cancel')),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryPurple),
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(dialogContext);
+
+              final cycleProvider = context.read<CycleProvider>();
 
               isUserLoggedIn = false;
               globalUserData = null;
-              CycleSettings.unload();
 
+              // Kosongkan data akun, lalu aktifkan kembali data guest
+              CycleSettings.unload();
+              await CycleSettings.loadGuest();
+              cycleProvider.reloadFromSettings();
+
+              if (!mounted) return;
               setState(() {
                 _isLoggedIn = false;
                 _currentPage = ProfileSubPage.main;
@@ -622,16 +629,19 @@ class _ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserv
           TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('Cancel')),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(dialogContext);
 
-              // Hapus data siklus
-              context.read<CycleProvider>().clearAllData();
+              final cycleProvider = context.read<CycleProvider>();
+              final accountEmail = _emailController.text.trim();
 
-              // Hapus pengaturan siklus akun ini (survei, durasi, dll.)
-              CycleSettings.deleteAccountData();
+              // Hapus pengaturan, survei, dan tanggal haid akun ini dari penyimpanan,
+              // lalu aktifkan kembali data guest dan segarkan Home/Calendar
+              await CycleSettings.deleteAccountData();
+              await CycleSettings.loadGuest();
+              cycleProvider.reloadFromSettings();
 
-              TrackerStore.clearAccount(_emailController.text.trim());
+              TrackerStore.clearAccount(accountEmail);
 
               // Hapus akun terdaftar & status login
               RegisteredAccount.clear();
@@ -642,6 +652,7 @@ class _ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserv
               _ProfileDraft.clear();
               ReminderService.cancelAll();
 
+              if (!mounted) return;
               setState(() {
                 _isLoggedIn = false;
                 _currentPage = ProfileSubPage.main;
@@ -1763,12 +1774,12 @@ class _ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserv
     );
   }
 
-/// Ubah satu pengaturan siklus, simpan ke akun, dan segarkan kalender/beranda.
-void _updateCycleSetting(VoidCallback update) {
-setState(update);
-CycleSettings.save();
-context.read<CycleProvider>().onSettingsChanged();
-}
+  /// Ubah satu pengaturan siklus, simpan ke akun, dan segarkan kalender/beranda.
+  void _updateCycleSetting(VoidCallback update) {
+    setState(update);
+    CycleSettings.save();
+    context.read<CycleProvider>().onSettingsChanged();
+  }
 
   // ---------------------------------------------------------------------------
   // Cycle and ovulation
@@ -1798,7 +1809,7 @@ context.read<CycleProvider>().onSettingsChanged();
                       value: CycleSettings.cycleLength,
                       min: 20,
                       max: 100,
-                    onChanged: (v) => _updateCycleSetting(() => CycleSettings.cycleLength = v),
+                      onChanged: (v) => _updateCycleSetting(() => CycleSettings.cycleLength = v),
                     ),
                     _buildNumberDropdown(
                       label: 'Period length (days)',
@@ -1821,7 +1832,7 @@ context.read<CycleProvider>().onSettingsChanged();
                           style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.darkText)),
                       value: CycleSettings.showPregnancyChance,
                       onChanged: (v) => _updateCycleSetting(() => CycleSettings.showPregnancyChance = v),
-),
+                    ),
                     _buildSettingDescription(
                       'If you turn this off, only your ovulation day will be shown.',
                     ),
@@ -1847,7 +1858,7 @@ context.read<CycleProvider>().onSettingsChanged();
                       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                       title: const Text('Show cycle days',
                           style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.darkText)),
-                      value: 	CycleSettings.showCycleDays,
+                      value: CycleSettings.showCycleDays,
                       onChanged: (v) => _updateCycleSetting(() => CycleSettings.showCycleDays = v),
                     ),
                     _buildSettingDescription(
