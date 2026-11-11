@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/providers/cycle_provider.dart';
 import 'login_screen.dart';
+import 'cycle_type_screen.dart';
 import '../../../core/routing/app_navigation.dart';
 import '../../../core/widgets/app_bottom_nav_bar.dart';
 import '../../../core/services/reminder_service.dart';
@@ -1048,6 +1049,14 @@ class _ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserv
                 icon: Icons.water_drop_outlined,
                 title: 'Cycle and ovulation',
                 onTap: () => setState(() => _currentPage = ProfileSubPage.cycleSettings),
+              ),
+              _buildMenuItem(
+                icon: Icons.category_outlined,
+                title: 'Cycle type',
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const CycleTypeScreen()),
+                ),
               ),
               _buildMenuItem(
                 icon: Icons.notifications_outlined,
