@@ -33,6 +33,43 @@ class CycleProvider extends ChangeNotifier {
 
   static DateTime _normalize(DateTime d) => DateTime(d.year, d.month, d.day);
 
+  // ---------------------------------------------------------------------------
+  // Penyimpanan permanen
+  // ---------------------------------------------------------------------------
+
+  /// Simpan tanggal haid ke penyimpanan akun aktif, lalu beri tahu layar.
+  void _commit() {
+    CycleSettings.saveLoggedDates(loggedPeriodDates);
+    notifyListeners();
+  }
+
+  /// Ganti data di memori dengan data milik akun yang sedang aktif di
+  /// CycleSettings. Panggil setelah CycleSettings.loadFor / loadGuest selesai.
+  void reloadFromSettings() {
+    loggedPeriodDates
+      ..clear()
+      ..addAll(CycleSettings.loggedDates);
+    notifyListeners();
+  }
+
+  /// Dipakai survei: catat haid terakhir mulai [start] sepanjang periodDays hari
+  /// (tidak melewati hari ini). Diabaikan kalau sudah ada data haid atau
+  /// tanggalnya di masa depan.
+  void setInitialPeriod(DateTime start) {
+    final s = _normalize(start);
+    if (s.isAfter(_normalize(DateTime.now()))) return;
+    if (loggedPeriodDates.isNotEmpty) return;
+
+    _addPeriodBlock(s);
+    _selectedDate = s;
+    _selectedMonth = DateTime(s.year, s.month);
+    _commit();
+  }
+
+  // ---------------------------------------------------------------------------
+  // Navigasi kalender
+  // ---------------------------------------------------------------------------
+
   void goToPrevMonth() {
     _selectedMonth = DateTime(_selectedMonth.year, _selectedMonth.month - 1);
     notifyListeners();
@@ -106,7 +143,7 @@ class CycleProvider extends ChangeNotifier {
       if (isStart) {
         // Tap tanggal awal = undo seluruh blok
         loggedPeriodDates.removeAll(target);
-        notifyListeners();
+        _commit();
         return;
       }
 
@@ -114,13 +151,13 @@ class CycleProvider extends ChangeNotifier {
         for (final d in target) {
           if (!d.isAfter(date)) loggedPeriodDates.remove(d);
         }
-        notifyListeners();
+        _commit();
         return;
       }
 
       if (isAdjacentAfter) {
         loggedPeriodDates.add(date);
-        notifyListeners();
+        _commit();
         return;
       }
 
@@ -128,7 +165,7 @@ class CycleProvider extends ChangeNotifier {
     }
 
     _addPeriodBlock(date);
-    notifyListeners();
+    _commit();
   }
 
   void logPeriodToday() {
@@ -138,7 +175,7 @@ class CycleProvider extends ChangeNotifier {
 
   void clearAllData() {
     loggedPeriodDates.clear();
-    notifyListeners();
+    _commit();
   }
 
   /// Apakah user sudah pernah mencatat haid
