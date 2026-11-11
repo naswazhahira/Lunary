@@ -1,3 +1,5 @@
+import 'package:provider/provider.dart';
+import '../providers/cycle_provider.dart';
 import 'package:flutter/material.dart';
 import '../../features/home/screens/home_screen.dart';
 import '../../features/calendar/screens/calendar_screen.dart';
@@ -74,7 +76,14 @@ void checkAuthAndExecute(BuildContext context, {required VoidCallback onSuccess}
 /// belum pernah melihatnya (sekali per akun).
 /// Return true kalau survei baru saja ditampilkan (diisi atau dilewati).
 Future<bool> showSurveyIfNeeded(BuildContext context, String email) async {
+  // Kalau guest sudah mengisi survei, jawaban dan tanggal haidnya dipindah ke akun ini
+  await CycleSettings.adoptGuestDataInto(email);
   await CycleSettings.loadFor(email);
+  if (!context.mounted) return false;
+
+  // Segarkan data haid di Home/Calendar sesuai akun yang baru login
+  context.read<CycleProvider>().reloadFromSettings();
+
   final done = await CycleSettings.isSurveyDone(email);
   if (done || !context.mounted) return false;
 
