@@ -25,6 +25,9 @@ class CycleStatusCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Supaya kartu digambar ulang saat tema berganti
+    context.watchTheme();
+
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
@@ -56,7 +59,7 @@ class CycleStatusCard extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const Text(
+        Text(
           'Cycle Status',
           style: TextStyle(
             fontSize: 16,
@@ -67,7 +70,7 @@ class CycleStatusCard extends StatelessWidget {
         if (onSeeMore != null)
           GestureDetector(
             onTap: onSeeMore,
-            child: const Icon(
+            child: Icon(
               Icons.chevron_right_rounded,
               color: AppColors.primaryPurple,
               size: 22,
@@ -83,7 +86,7 @@ class CycleStatusCard extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Icon Container
+          // Icon container
           Container(
             width: 48,
             height: 48,
@@ -98,18 +101,18 @@ class CycleStatusCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 10),
-          // Nilai Angka / Status Utama
+          // Nilai angka / status utama
           Text(
             stat.value,
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.bold,
               color: AppColors.primaryPurple,
             ),
           ),
           const SizedBox(height: 4),
-          // Label Penjelas (Bisa terlipat ke bawah jika panjang)
+          // Label penjelas (bisa terlipat ke bawah jika panjang)
           Text(
             stat.label,
             textAlign: TextAlign.center,
