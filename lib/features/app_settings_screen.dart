@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/painters/dashed_circle_painter.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../reports/widgets/report_widgets.dart';
+import 'reports/widgets/report_widgets.dart';
 
 class AppSettingsScreen extends StatelessWidget {
   const AppSettingsScreen({Key? key}) : super(key: key);
