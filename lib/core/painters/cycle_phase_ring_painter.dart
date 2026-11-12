@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import '../theme/app_colors.dart';
 
 class CyclePhaseRingPainter extends CustomPainter {
   final double periodFraction;
@@ -40,23 +41,32 @@ class CyclePhaseRingPainter extends CustomPainter {
       );
     }
 
+    // Warna dibaca saat menggambar, jadi selalu mengikuti tema aktif.
     double cursor = 0;
-    drawArc(cursor, periodFraction, const Color(0xFFED5589));
+    drawArc(cursor, periodFraction, AppColors.period);
     cursor += periodFraction;
-    drawArc(cursor, follicularFraction, const Color(0xFF6C5CE7));
+    drawArc(cursor, follicularFraction, AppColors.primaryPurple);
     cursor += follicularFraction;
-    drawArc(cursor, fertileFraction, const Color(0xFFF5C77E));
+    drawArc(cursor, fertileFraction, AppColors.ringFertile);
     cursor += fertileFraction;
-    drawArc(cursor, lutealFraction, const Color(0xFFD8CFF0));
+    drawArc(cursor, lutealFraction, AppColors.ringLuteal);
 
+    // Penanda hari ini
     final todayAngle = startAngle + todayProgress * 2 * math.pi;
-    final todayPoint = Offset(center.dx + radius * math.cos(todayAngle), center.dy + radius * math.sin(todayAngle));
+    final todayPoint = Offset(
+      center.dx + radius * math.cos(todayAngle),
+      center.dy + radius * math.sin(todayAngle),
+    );
     canvas.drawCircle(todayPoint, 11, Paint()..color = Colors.white);
-    canvas.drawCircle(todayPoint, 7, Paint()..color = const Color(0xFF2E2A4A));
+    canvas.drawCircle(todayPoint, 7, Paint()..color = AppColors.darkText);
 
+    // Penanda ovulasi
     final ovAngle = startAngle + ovulationProgress * 2 * math.pi;
-    final ovPoint = Offset(center.dx + radius * math.cos(ovAngle), center.dy + radius * math.sin(ovAngle));
-    canvas.drawCircle(ovPoint, 6, Paint()..color = const Color(0xFF6C5CE7));
+    final ovPoint = Offset(
+      center.dx + radius * math.cos(ovAngle),
+      center.dy + radius * math.sin(ovAngle),
+    );
+    canvas.drawCircle(ovPoint, 6, Paint()..color = AppColors.primaryPurple);
   }
 
   @override
