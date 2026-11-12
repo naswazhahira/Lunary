@@ -17,10 +17,12 @@ class CalendarScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cycle = context.watch<CycleProvider>();
+    // Supaya layar digambar ulang saat tema berganti
+    context.watchTheme();
 
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
+        decoration: BoxDecoration(gradient: AppColors.backgroundGradient),
         child: SafeArea(
           child: Column(
             children: [
@@ -92,7 +94,7 @@ class CalendarScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               ShaderMask(
-                shaderCallback: (bounds) => const LinearGradient(
+                shaderCallback: (bounds) => LinearGradient(
                   colors: [AppColors.primaryPink, AppColors.primaryPurple],
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
