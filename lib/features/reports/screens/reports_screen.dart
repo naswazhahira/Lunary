@@ -57,6 +57,8 @@ class _ReportsScreenState extends State<ReportsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    context.watchTheme(); // Menambahkan watchTheme sesuai diff
+
     return ReportScaffold(
       title: 'Charts & reports',
       body: ListView(
@@ -109,7 +111,8 @@ class _ReportsScreenState extends State<ReportsScreen> {
                     : const [18, 26, 22, 30, 24, 28],
                 showLabels: false,
                 height: 64,
-                color: hasData ? const Color(0xFFB197FC) : const Color(0xFFE5E7EB),
+                // Mengubah color menggunakan AppColors.avatar sesuai diff
+                color: hasData ? AppColors.avatar : const Color(0xFFE5E7EB),
                 highlightLast: hasData,
               ),
               const SizedBox(height: 10),
