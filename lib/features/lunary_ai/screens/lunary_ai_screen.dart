@@ -194,10 +194,12 @@ class _LunaryAiScreenState extends State<LunaryAiScreen> {
   @override
   Widget build(BuildContext context) {
     final keyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
+    // Supaya layar digambar ulang saat tema berganti
+    context.watchTheme();
 
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
+        decoration: BoxDecoration(gradient: AppColors.backgroundGradient),
         child: SafeArea(
           child: Column(
             children: [
@@ -258,7 +260,7 @@ class _LunaryAiScreenState extends State<LunaryAiScreen> {
     return Container(
       width: size,
       height: size,
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: LinearGradient(
           colors: [AppColors.primaryPink, AppColors.primaryPurple],
@@ -398,7 +400,7 @@ class _LunaryAiScreenState extends State<LunaryAiScreen> {
               ),
               child: Text(
                 _suggestions[i],
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12.5,
                   fontWeight: FontWeight.w600,
                   color: AppColors.primaryPurple,
