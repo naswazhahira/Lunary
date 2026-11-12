@@ -13,10 +13,12 @@ class CycleDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cycle = context.watch<CycleProvider>();
+    // Supaya layar digambar ulang saat tema berganti
+    context.watchTheme();
 
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
+        decoration: BoxDecoration(gradient: AppColors.backgroundGradient),
         child: SafeArea(
           child: Column(
             children: [
@@ -162,14 +164,15 @@ class CycleDetailScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
+          // Warna legenda sama dengan warna cincin (CyclePhaseRingPainter)
           Wrap(
             spacing: 14,
             runSpacing: 8,
-            children: const [
-              _RingLegendDot(color: Color(0xFFED5589), label: 'Period'),
-              _RingLegendDot(color: Color(0xFF6C5CE7), label: 'Follicular'),
-              _RingLegendDot(color: Color(0xFFF5C77E), label: 'Fertile window'),
-              _RingLegendDot(color: Color(0xFFD8CFF0), label: 'Luteal'),
+            children: [
+              _RingLegendDot(color: AppColors.period, label: 'Period'),
+              _RingLegendDot(color: AppColors.primaryPurple, label: 'Follicular'),
+              _RingLegendDot(color: AppColors.ringFertile, label: 'Fertile window'),
+              _RingLegendDot(color: AppColors.ringLuteal, label: 'Luteal'),
             ],
           ),
         ],
@@ -195,11 +198,11 @@ class CycleDetailScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
               Icon(Icons.circle, size: 8, color: AppColors.primaryPink),
-              SizedBox(width: 8),
-              Text(
+              const SizedBox(width: 8),
+              const Text(
                 'Symptom prediction',
                 style: TextStyle(
                   fontSize: 15,
@@ -276,11 +279,11 @@ class CycleDetailScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
               Icon(Icons.circle, size: 8, color: AppColors.primaryPurple),
-              SizedBox(width: 8),
-              Text(
+              const SizedBox(width: 8),
+              const Text(
                 'Fertility level',
                 style: TextStyle(
                   fontSize: 15,
