@@ -536,10 +536,12 @@ A Gentle 10-Minute Period Movement Routine:
   @override
   Widget build(BuildContext context) {
     final sections = _getSampleData();
+    // Supaya layar digambar ulang saat tema berganti
+    context.watchTheme();
 
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
+        decoration: BoxDecoration(gradient: AppColors.backgroundGradient),
         child: SafeArea(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
