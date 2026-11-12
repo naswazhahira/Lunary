@@ -203,6 +203,9 @@ class CycleTypeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cycle = context.watch<CycleProvider>();
+    // Supaya layar digambar ulang saat tema berganti
+    context.watchTheme();
+
     final stats = CycleStats.from(cycle.loggedPeriodDates);
 
     final hasCycles = stats.cycleLengths.isNotEmpty;
@@ -301,7 +304,7 @@ class CycleTypeScreen extends StatelessWidget {
                   color: AppColors.primaryPurple.withValues(alpha: 0.12),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.category_outlined, color: AppColors.primaryPurple, size: 24),
+                child: Icon(Icons.category_outlined, color: AppColors.primaryPurple, size: 24),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -405,14 +408,14 @@ class CycleTypeScreen extends StatelessWidget {
                         children: [
                           Text(
                             info.actionLabel!,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 12.5,
                               fontWeight: FontWeight.bold,
                               color: AppColors.primaryPurple,
                             ),
                           ),
                           const SizedBox(width: 2),
-                          const Icon(Icons.chevron_right_rounded,
+                          Icon(Icons.chevron_right_rounded,
                               size: 18, color: AppColors.primaryPurple),
                         ],
                       ),
@@ -566,7 +569,7 @@ class _RangeBar extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('${_n(data.min)}', style: const TextStyle(fontSize: 10.5, color: Colors.grey)),
+            Text(_n(data.min), style: const TextStyle(fontSize: 10.5, color: Colors.grey)),
             Text(
               'Typical: ${_n(data.typicalStart)} to ${_n(data.typicalEnd)} days',
               style: const TextStyle(fontSize: 10.5, color: _okColor, fontWeight: FontWeight.w600),
