@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_colors.dart';
 
 class AppProfileAvatar extends StatelessWidget {
   final double size;
@@ -12,6 +13,9 @@ class AppProfileAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Supaya avatar digambar ulang saat tema berganti
+    context.watchTheme();
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -19,14 +23,14 @@ class AppProfileAvatar extends StatelessWidget {
         height: size,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: const Color(0xFFB197FC),
+          color: AppColors.avatar,
           border: Border.all(
             color: Colors.white,
             width: 2.5,
           ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFFB197FC).withOpacity(0.35),
+              color: AppColors.avatar.withOpacity(0.35),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
