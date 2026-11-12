@@ -6,6 +6,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/providers/cycle_provider.dart';
 import 'login_screen.dart';
 import 'cycle_type_screen.dart';
+import 'app_settings_screen.dart';
 import '../../../core/routing/app_navigation.dart';
 import '../../../core/widgets/app_bottom_nav_bar.dart';
 import '../../../core/services/reminder_service.dart';
@@ -446,11 +447,11 @@ class _ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserv
     required IconData icon,
     required String label,
     required VoidCallback onTap,
-    Color iconColor = AppColors.primaryPurple,
+    Color? iconColor,
     Color textColor = AppColors.darkText,
   }) {
     return ListTile(
-      leading: Icon(icon, color: iconColor),
+      leading: Icon(icon, color: iconColor ?? AppColors.primaryPurple),
       title: Text(label, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: textColor)),
       onTap: () {
         Navigator.pop(context);
@@ -709,7 +710,7 @@ class _ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserv
                       color: AppColors.primaryPurple.withOpacity(0.12),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(Icons.shield_outlined, color: AppColors.primaryPurple, size: 24),
+                    child: Icon(Icons.shield_outlined, color: AppColors.primaryPurple, size: 24),
                   ),
                   const SizedBox(width: 12),
                   const Expanded(
@@ -879,7 +880,7 @@ class _ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserv
                   height: 46,
                   child: OutlinedButton(
                     style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: AppColors.primaryPurple),
+                      side: BorderSide(color: AppColors.primaryPurple),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                     ),
                     onPressed: () {
@@ -890,7 +891,7 @@ class _ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserv
                       });
                       _showSnackBar('Optional consent withdrawn.');
                     },
-                    child: const Text('Withdraw all optional consent',
+                    child: Text('Withdraw all optional consent',
                         style: TextStyle(
                             fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.primaryPurple)),
                   ),
@@ -955,11 +956,13 @@ class _ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserv
 
   @override
   Widget build(BuildContext context) {
+    // Supaya layar digambar ulang saat tema berganti
+    context.watchTheme();
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
         body: Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             gradient: AppColors.backgroundGradient,
           ),
           child: SafeArea(
@@ -1064,6 +1067,14 @@ class _ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserv
                 onTap: _openReminders,
               ),
               _buildMenuItem(
+                icon: Icons.settings_outlined,
+                title: 'App settings',
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const AppSettingsScreen()),
+                ),
+              ),
+              _buildMenuItem(
                 icon: Icons.lock_outline,
                 title: 'Privacy settings',
                 onTap: () => setState(() => _currentPage = ProfileSubPage.privacySettings),
@@ -1097,7 +1108,7 @@ class _ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserv
                     decoration: BoxDecoration(
                         color: AppColors.primaryPurple.withOpacity(0.12),
                         borderRadius: BorderRadius.circular(12)),
-                    child: const Icon(Icons.security_rounded, color: AppColors.primaryPurple, size: 24),
+                    child: Icon(Icons.security_rounded, color: AppColors.primaryPurple, size: 24),
                   ),
                   const SizedBox(width: 12),
                   const Expanded(
@@ -1124,7 +1135,7 @@ class _ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserv
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                   onPressed: _showPrivacyInfoSheet,
-                  child: const Text('Learn more',
+                  child: Text('Learn more',
                       style: TextStyle(color: AppColors.primaryPurple, fontWeight: FontWeight.w600, fontSize: 13)),
                 ),
               ),
@@ -1197,7 +1208,7 @@ class _ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserv
                     height: 60,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: const Color(0xFFB197FC),
+                      color: AppColors.avatar,
                       border: Border.all(color: Colors.white, width: 2.5),
                       image: _profileImage != null
                           ? DecorationImage(
@@ -1212,7 +1223,7 @@ class _ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserv
                   ),
                   Container(
                     padding: const EdgeInsets.all(4),
-                    decoration: const BoxDecoration(color: AppColors.primaryPink, shape: BoxShape.circle),
+                    decoration: BoxDecoration(color: AppColors.primaryPink, shape: BoxShape.circle),
                     child: Icon(_profileImage == null ? Icons.add : Icons.edit, size: 10, color: Colors.white),
                   ),
                 ],
@@ -1231,7 +1242,7 @@ class _ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserv
                   const SizedBox(height: 6),
                   GestureDetector(
                     onTap: () => setState(() => _currentPage = ProfileSubPage.editProfile),
-                    child: const Text('Edit info',
+                    child: Text('Edit info',
                         style: TextStyle(fontSize: 13, color: AppColors.primaryPink, fontWeight: FontWeight.bold)),
                   ),
                 ],
@@ -1250,13 +1261,13 @@ class _ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserv
                     value: completeness,
                     minHeight: 6,
                     backgroundColor: AppColors.primaryPurple.withOpacity(0.12),
-                    valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primaryPurple),
+                    valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryPurple),
                   ),
                 ),
               ),
               const SizedBox(width: 10),
               Text('$percent%',
-                  style: const TextStyle(
+                  style: TextStyle(
                       fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primaryPurple)),
             ],
           ),
@@ -1280,8 +1291,8 @@ class _ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserv
             Container(
               width: 44,
               height: 44,
-              decoration: const BoxDecoration(
-                color: Color(0xFFB197FC),
+              decoration: BoxDecoration(
+                color: AppColors.avatar,
                 shape: BoxShape.circle,
               ),
               child: const Center(
@@ -1384,7 +1395,7 @@ class _ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserv
                         height: 76,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: const Color(0xFFD6C7FF),
+                          color: AppColors.avatar,
                           image: _profileImage != null
                               ? DecorationImage(
                             image: FileImage(_profileImage!),
@@ -1400,7 +1411,7 @@ class _ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserv
                         onTap: () => _showProfilePhotoOptions(fromEditPage: true),
                         child: Container(
                           padding: const EdgeInsets.all(8),
-                          decoration: const BoxDecoration(color: AppColors.primaryPurple, shape: BoxShape.circle),
+                          decoration: BoxDecoration(color: AppColors.primaryPurple, shape: BoxShape.circle),
                           child: const Icon(Icons.camera_alt, size: 16, color: Colors.white),
                         ),
                       ),
@@ -1411,7 +1422,7 @@ class _ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserv
                 GestureDetector(
                   onTap: () => _showProfilePhotoOptions(fromEditPage: true),
                   child: Text(_profileImage == null ? 'Add Profile Photo' : 'Change Profile Picture',
-                      style: const TextStyle(
+                      style: TextStyle(
                           color: AppColors.primaryPurple, fontWeight: FontWeight.bold, fontSize: 13)),
                 ),
                 const SizedBox(height: 20),
@@ -1658,7 +1669,7 @@ class _ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserv
         _buildSubPageHeader('Reminders'),
         Expanded(
           child: _reminderChecking
-              ? const Center(child: CircularProgressIndicator(color: AppColors.primaryPurple))
+              ? Center(child: CircularProgressIndicator(color: AppColors.primaryPurple))
               : !_reminderPermission
               ? _buildReminderPermissionGate()
               : _buildReminderList(),
@@ -1688,7 +1699,7 @@ class _ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserv
                   color: AppColors.primaryPurple.withOpacity(0.12),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.alarm, color: AppColors.primaryPurple, size: 36),
+                child: Icon(Icons.alarm, color: AppColors.primaryPurple, size: 36),
               ),
               const SizedBox(height: 16),
               const Text('Allow Lunary to use alarms?',
@@ -1754,7 +1765,7 @@ class _ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserv
         Padding(
           padding: const EdgeInsets.only(left: 4, bottom: 8),
           child: Text(section,
-              style: const TextStyle(
+              style: TextStyle(
                   fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.primaryPurple)),
         ),
         _buildCardContainer(tiles),
@@ -2087,7 +2098,7 @@ class _ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserv
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFEEEBFF),
+                  color: AppColors.softTint,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Column(
@@ -2100,7 +2111,7 @@ class _ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserv
                       onChanged: (value) => setState(() => _helpQuery = value),
                       decoration: InputDecoration(
                         hintText: 'Search help topics...',
-                        prefixIcon: const Icon(Icons.search, color: AppColors.primaryPurple),
+                        prefixIcon: Icon(Icons.search, color: AppColors.primaryPurple),
                         suffixIcon: _helpQuery.isNotEmpty
                             ? IconButton(
                           icon: const Icon(Icons.close, size: 18),
@@ -2130,7 +2141,7 @@ class _ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserv
                       const SizedBox(height: 8),
                       TextButton(
                         onPressed: _openLunaryAI,
-                        child: const Text('Ask Lunary AI instead',
+                        child: Text('Ask Lunary AI instead',
                             style: TextStyle(
                                 color: AppColors.primaryPurple, fontWeight: FontWeight.bold)),
                       ),
@@ -2204,7 +2215,7 @@ class _ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserv
                             color: AppColors.primaryPurple.withOpacity(0.12),
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: const Icon(Icons.auto_awesome,
+                          child: Icon(Icons.auto_awesome,
                               color: AppColors.primaryPurple, size: 22),
                         ),
                         const SizedBox(width: 12),
@@ -2348,7 +2359,7 @@ class _ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserv
                 borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade300)),
             focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: AppColors.primaryPurple, width: 2)),
+                borderSide: BorderSide(color: AppColors.primaryPurple, width: 2)),
           ),
         ),
       ],
@@ -2375,7 +2386,7 @@ class _ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserv
 
   Widget _buildListTile({
     required IconData icon,
-    Color iconColor = AppColors.primaryPurple,
+    Color? iconColor,
     required String title,
     Color titleColor = AppColors.darkText,
     required String subtitle,
@@ -2384,7 +2395,7 @@ class _ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserv
     return ListTile(
       onTap: onTap,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      leading: Icon(icon, color: iconColor, size: 24),
+      leading: Icon(icon, color: iconColor ?? AppColors.primaryPurple, size: 24),
       title: Text(title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: titleColor)),
       subtitle: Padding(
         padding: const EdgeInsets.only(top: 4.0),
