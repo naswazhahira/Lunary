@@ -6,7 +6,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/providers/cycle_provider.dart';
 import 'login_screen.dart';
 import 'cycle_type_screen.dart';
-import 'app_settings_screen.dart';
+import '../../app_settings_screen.dart';
 import '../../../core/routing/app_navigation.dart';
 import '../../../core/widgets/app_bottom_nav_bar.dart';
 import '../../../core/services/reminder_service.dart';
