@@ -50,6 +50,8 @@ class _WeeklyCalendarState extends State<WeeklyCalendar> {
   @override
   Widget build(BuildContext context) {
     final cycle = context.watch<CycleProvider>();
+    // Supaya strip digambar ulang saat tema berganti
+    context.watchTheme();
 
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -136,7 +138,7 @@ class _WeeklyCalendarState extends State<WeeklyCalendar> {
       decoration: BoxDecoration(
         color: fillColor,
         shape: BoxShape.circle,
-        // Hari ini selalu diberi cincin ungu
+        // Hari ini selalu diberi cincin aksen
         border: isToday ? Border.all(color: AppColors.primaryPurple, width: 2) : null,
       ),
       child: Center(
@@ -154,7 +156,7 @@ class _WeeklyCalendarState extends State<WeeklyCalendar> {
     if (isFertile) {
       return CustomPaint(
         size: const Size(size, size),
-        painter: const DashedCirclePainter(color: AppColors.fertile),
+        painter: DashedCirclePainter(color: AppColors.fertile),
         child: badge,
       );
     }
