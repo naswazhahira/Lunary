@@ -119,7 +119,7 @@ class CycleSurveyScreen extends StatefulWidget {
   /// Kalau null, layar ini cukup di-pop (dipakai alur login).
   final VoidCallback? onFinished;
 
-  const CycleSurveyScreen({Key? key, this.onFinished}) : super(key: key);
+  const CycleSurveyScreen({super.key, this.onFinished});
 
   @override
   State<CycleSurveyScreen> createState() => _CycleSurveyScreenState();
@@ -246,7 +246,7 @@ class _CycleSurveyScreenState extends State<CycleSurveyScreen> {
       },
       child: Scaffold(
         body: Container(
-          decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
+          decoration: BoxDecoration(gradient: AppColors.backgroundGradient),
           child: SafeArea(
             child: Column(
               children: [
@@ -316,14 +316,14 @@ class _CycleSurveyScreenState extends State<CycleSurveyScreen> {
                   value: value,
                   minHeight: 6,
                   backgroundColor: AppColors.primaryPurple.withValues(alpha: 0.12),
-                  valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primaryPurple),
+                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryPurple),
                 ),
               ),
             ),
           ),
           TextButton(
             onPressed: () => _finish(saveAnswers: false),
-            child: const Text(
+            child: Text(
               'Skip',
               style: TextStyle(
                 fontSize: 14,
@@ -410,8 +410,7 @@ class _DatePage extends StatelessWidget {
   final DateTime? selected;
   final ValueChanged<DateTime> onSelected;
 
-  const _DatePage({Key? key, required this.selected, required this.onSelected})
-      : super(key: key);
+  const _DatePage({super.key, required this.selected, required this.onSelected});
 
   @override
   Widget build(BuildContext context) {
@@ -426,7 +425,7 @@ class _DatePage extends StatelessWidget {
               color: AppColors.primaryPurple.withValues(alpha: 0.12),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.event_rounded, color: AppColors.primaryPurple, size: 32),
+            child: Icon(Icons.event_rounded, color: AppColors.primaryPurple, size: 32),
           ),
           const SizedBox(height: 18),
           const Text(
@@ -464,12 +463,12 @@ class _DatePage extends StatelessWidget {
               color: AppColors.primaryPurple.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(16),
             ),
-            child: const Row(
+            child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Icon(Icons.info_outline_rounded, size: 18, color: AppColors.primaryPurple),
-                SizedBox(width: 10),
-                Expanded(
+                const SizedBox(width: 10),
+                const Expanded(
                   child: Text(
                     'A rough date is fine. You can correct it anytime in the Calendar tab.',
                     style: TextStyle(fontSize: 12, height: 1.5, color: AppColors.darkerSubText),
@@ -488,8 +487,7 @@ class _PeriodDatePicker extends StatefulWidget {
   final DateTime? selected;
   final ValueChanged<DateTime> onSelected;
 
-  const _PeriodDatePicker({Key? key, required this.selected, required this.onSelected})
-      : super(key: key);
+  const _PeriodDatePicker({super.key, required this.selected, required this.onSelected});
 
   @override
   State<_PeriodDatePicker> createState() => _PeriodDatePickerState();
@@ -566,7 +564,7 @@ class _PeriodDatePickerState extends State<_PeriodDatePicker> {
               ),
               Text(
                 '${_monthLong[_month.month - 1]} ${_month.year}',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                   color: AppColors.primaryPurple,
@@ -672,11 +670,11 @@ class _NumberPage extends StatefulWidget {
   final ValueChanged<int> onChanged;
 
   const _NumberPage({
-    Key? key,
+    super.key,
     required this.question,
     required this.initialValue,
     required this.onChanged,
-  }) : super(key: key);
+  });
 
   @override
   State<_NumberPage> createState() => _NumberPageState();
@@ -920,7 +918,7 @@ class _NumberPageState extends State<_NumberPage> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.info_outline_rounded, size: 18, color: AppColors.primaryPurple),
+          Icon(Icons.info_outline_rounded, size: 18, color: AppColors.primaryPurple),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
