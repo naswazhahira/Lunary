@@ -29,6 +29,9 @@ class CalendarMonthCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Supaya kartu digambar ulang saat tema berganti
+    context.watchTheme();
+
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 12),
       decoration: BoxDecoration(
@@ -62,11 +65,11 @@ class CalendarMonthCard extends StatelessWidget {
       children: [
         IconButton(
           onPressed: onPrevMonth,
-          icon: const Icon(Icons.chevron_left, color: AppColors.primaryPurple),
+          icon: Icon(Icons.chevron_left, color: AppColors.primaryPurple),
         ),
         Text(
           '${_monthNames[month.month - 1]} ${month.year}',
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
             color: AppColors.primaryPurple,
@@ -75,7 +78,7 @@ class CalendarMonthCard extends StatelessWidget {
         ),
         IconButton(
           onPressed: onNextMonth,
-          icon: const Icon(Icons.chevron_right, color: AppColors.primaryPurple),
+          icon: Icon(Icons.chevron_right, color: AppColors.primaryPurple),
         ),
       ],
     );
@@ -154,13 +157,13 @@ class CalendarMonthCard extends StatelessWidget {
         circle = _filledCircle(size, AppColors.predictPeriod, day.day, Colors.white);
         break;
       case CalendarDayType.fertile:
-      // Tampilkan Dashed Circle + Border Ungu jika tanggal ini adalah Hari Ini (Today)
+      // Dashed circle + border aksen jika tanggal ini adalah hari ini
         circle = Stack(
           alignment: Alignment.center,
           children: [
             CustomPaint(
               size: Size(size, size),
-              painter: const DashedCirclePainter(color: AppColors.fertile),
+              painter: DashedCirclePainter(color: AppColors.fertile),
             ),
             if (isToday)
               Container(
@@ -180,11 +183,9 @@ class CalendarMonthCard extends StatelessWidget {
             ? Container(
           width: size,
           height: size,
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             shape: BoxShape.circle,
-            border: Border.fromBorderSide(
-              BorderSide(color: AppColors.primaryPurple, width: 2),
-            ),
+            border: Border.all(color: AppColors.primaryPurple, width: 2),
           ),
           child: Center(
             child: _numberText(day.day, AppColors.calendarNumber, size),
@@ -211,7 +212,7 @@ class CalendarMonthCard extends StatelessWidget {
             child: Container(
               width: 7,
               height: 7,
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: AppColors.ovulation,
                 shape: BoxShape.circle,
               ),
