@@ -60,7 +60,8 @@ class ReportScaffold extends StatelessWidget {
     return Scaffold(
       floatingActionButton: floatingActionButton,
       body: Container(
-        decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
+        // const dihapus dari BoxDecoration sesuai permintaan
+        decoration: BoxDecoration(gradient: AppColors.backgroundGradient),
         child: SafeArea(
           child: Column(
             children: [
@@ -199,7 +200,7 @@ class ReportEmpty extends StatelessWidget {
 class SimpleBarChart extends StatelessWidget {
   final List<double> values;
   final List<String> labels;
-  final Color color;
+  final Color? color;
   final Color highlightColor;
   final double height;
   final int decimals;
@@ -210,7 +211,7 @@ class SimpleBarChart extends StatelessWidget {
     Key? key,
     required this.values,
     this.labels = const [],
-    this.color = const Color(0xFFB197FC),
+    this.color,
     this.highlightColor = const Color(0xFFFFB74D),
     this.height = 180,
     this.decimals = 0,
@@ -227,7 +228,7 @@ class SimpleBarChart extends StatelessWidget {
         painter: _BarPainter(
           values: values,
           labels: labels,
-          color: color,
+          color: color ?? AppColors.avatar, // Warna bawaan mengikuti tema
           highlightColor: highlightColor,
           decimals: decimals,
           showLabels: showLabels,
@@ -325,7 +326,7 @@ class LinePoint {
 
 class SimpleLineChart extends StatelessWidget {
   final List<LinePoint> points;
-  final Color color;
+  final Color? color;
   final double height;
   final int decimals;
   final List<DateTime> markers;
@@ -334,7 +335,7 @@ class SimpleLineChart extends StatelessWidget {
   const SimpleLineChart({
     Key? key,
     required this.points,
-    this.color = const Color(0xFF7C3AED),
+    this.color,
     this.height = 220,
     this.decimals = 1,
     this.markers = const [],
@@ -349,7 +350,7 @@ class SimpleLineChart extends StatelessWidget {
       child: CustomPaint(
         painter: _LinePainter(
           points: points,
-          color: color,
+          color: color ?? AppColors.primaryPurple, // Warna bawaan mengikuti tema
           decimals: decimals,
           markers: markers,
           markerColor: markerColor,
@@ -418,6 +419,7 @@ class _LinePainter extends CustomPainter {
     for (int i = 0; i <= 3; i++) {
       final y = topPad + h * i / 3;
       canvas.drawLine(Offset(leftPad, y), Offset(size.width - rightPad, y), grid);
+
       final value = maxV - (maxV - minV) * i / 3;
       _drawText(canvas, value.toStringAsFixed(decimals), Offset(leftPad / 2 - 2, y), fontSize: 9.5);
     }
