@@ -101,6 +101,7 @@ class _TrackerReportScreenState extends State<TrackerReportScreen> {
   Widget build(BuildContext context) {
     final info = _info;
     final inRange = _entriesInRange();
+    context.watchTheme();
 
     return ReportScaffold(
       title: info.title,
@@ -114,7 +115,7 @@ class _TrackerReportScreenState extends State<TrackerReportScreen> {
         ),
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator(color: AppColors.primaryPurple))
+          ? Center(child: CircularProgressIndicator(color: AppColors.primaryPurple))
           : ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
         children: [
@@ -382,7 +383,7 @@ class _AddEntrySheetState extends State<_AddEntrySheet> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.calendar_today_outlined,
+                    Icon(Icons.calendar_today_outlined,
                         size: 18, color: AppColors.primaryPurple),
                     const SizedBox(width: 10),
                     Text(fullDate(_date),
@@ -405,7 +406,7 @@ class _AddEntrySheetState extends State<_AddEntrySheet> {
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: AppColors.primaryPurple, width: 2),
+                  borderSide: BorderSide(color: AppColors.primaryPurple, width: 2),
                 ),
               ),
             ),
