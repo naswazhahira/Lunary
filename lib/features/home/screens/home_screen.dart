@@ -43,8 +43,8 @@ class HomeScreen extends StatelessWidget {
                       Container(
                         width: 64,
                         height: 64,
-                        decoration: const BoxDecoration(color: Color(0xFFF3E7FC), shape: BoxShape.circle),
-                        child: const Center(child: Icon(Icons.favorite_rounded, color: AppColors.primaryPink, size: 30)),
+                        decoration: BoxDecoration(color: AppColors.softTint, shape: BoxShape.circle),
+                        child: Center(child: Icon(Icons.favorite_rounded, color: AppColors.primaryPink, size: 30)),
                       ),
                       const SizedBox(height: 20),
                       const Text(
@@ -104,10 +104,12 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cycle = context.watch<CycleProvider>();
+    // Supaya layar digambar ulang saat tema berganti
+    context.watchTheme();
 
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
+        decoration: BoxDecoration(gradient: AppColors.backgroundGradient),
         child: SafeArea(
           child: Column(
             children: [
@@ -178,7 +180,7 @@ class HomeScreen extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                     decoration: BoxDecoration(color: AppColors.primaryPink.withOpacity(0.12), borderRadius: BorderRadius.circular(10)),
-                    child: Text(cycle.currentPhaseLabel, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primaryPink, height: 1.0)),
+                    child: Text(cycle.currentPhaseLabel, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primaryPink, height: 1.0)),
                   ),
                   const SizedBox(width: 8),
                   const Text('•', style: TextStyle(fontSize: 12, color: AppColors.darkerSubText, fontWeight: FontWeight.bold)),
@@ -234,7 +236,7 @@ class HomeScreen extends StatelessWidget {
               height: 260,
               child: CustomPaint(
                 painter: MainCycleRingPainter(
-                  progress: cycle.phaseProgress, // sebelumnya cycle.ringProgress
+                  progress: cycle.phaseProgress,
                   color: _ringColorFor(phase),
                   showProgress: hasData,
                 ),
@@ -278,7 +280,7 @@ class HomeScreen extends StatelessWidget {
         Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.darkText)),
         GestureDetector(
           onTap: onSeeAll,
-          child: const Text('See All', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.primaryPurple)),
+          child: Text('See All', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.primaryPurple)),
         ),
       ],
     );
@@ -385,7 +387,7 @@ class HomeScreen extends StatelessWidget {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                             decoration: BoxDecoration(color: AppColors.primaryPink.withOpacity(0.12), borderRadius: BorderRadius.circular(8)),
-                            child: Text(article.category, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.primaryPink)),
+                            child: Text(article.category, style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.primaryPink)),
                           ),
                           const SizedBox(height: 6),
                           Text(
@@ -422,7 +424,7 @@ class MainCycleRingPainter extends CustomPainter {
 
   MainCycleRingPainter({
     required this.progress,
-    this.color = AppColors.primaryPink,
+    required this.color,
     this.showProgress = true,
   });
 
