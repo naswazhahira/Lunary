@@ -65,10 +65,12 @@ class ArticleDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final media = MediaQuery.of(context);
+    // Supaya layar digambar ulang saat tema berganti
+    context.watchTheme();
 
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
+        decoration: BoxDecoration(gradient: AppColors.backgroundGradient),
         child: Stack(
           children: [
             // Hero image: diam di belakang
@@ -177,7 +179,7 @@ class ArticleDetailScreen extends StatelessWidget {
                   ),
                   child: Text(
                     article.category,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
                       color: AppColors.primaryPink,
@@ -303,7 +305,7 @@ class ArticleDetailScreen extends StatelessWidget {
                       ),
                       child: Text(
                         next.category,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
                           color: AppColors.primaryPink,
@@ -391,7 +393,7 @@ class ArticleDetailScreen extends StatelessWidget {
               ),
               child: Text(
                 match.group(1)!,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w800,
                   color: AppColors.primaryPink,
@@ -434,7 +436,7 @@ class ArticleDetailScreen extends StatelessWidget {
             width: 6,
             height: 6,
             margin: const EdgeInsets.only(top: 9, right: 12, left: 4),
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: AppColors.primaryPink,
               shape: BoxShape.circle,
             ),
@@ -477,10 +479,10 @@ class ArticleDetailScreen extends StatelessWidget {
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: const [
+        children: [
           Icon(Icons.info_outline_rounded, size: 18, color: AppColors.primaryPurple),
-          SizedBox(width: 10),
-          Expanded(
+          const SizedBox(width: 10),
+          const Expanded(
             child: Text(
               'This is general information, not medical advice. If symptoms persist or feel severe, talk to a doctor.',
               style: TextStyle(
