@@ -7,6 +7,9 @@ class CalendarLegend extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Supaya legenda digambar ulang saat tema berganti
+    context.watchTheme();
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
