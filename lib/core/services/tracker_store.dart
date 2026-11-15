@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'cloud_sync.dart';
 
 enum TrackerType { temperature, weight, water, sleep }
 
@@ -148,11 +149,21 @@ class TrackerStore {
     return result;
   }
 
-  static Future<void> _save(String account, TrackerType type, Map<DateTime, double> data) async {
+  static Future<void> _saveLocal(String account, TrackerType type, Map<DateTime, double> data) async {
     final prefs = await SharedPreferences.getInstance();
     final entries = data.entries.map((e) => '${_dateKey(e.key)}|${e.value}').toList();
     await prefs.setStringList(_prefsKey(account, type), entries);
   }
+
+  static Future<void> _save(String account, TrackerType type, Map<DateTime, double> data) async {
+    await _saveLocal(account, type, data);
+    CloudSync.pushTracker(account, type, data);
+  }
+
+  /// Dipakai CloudSync: simpan data dari cloud tanpa mengirimnya balik.
+  static Future<void> importFromCloud(String account, TrackerType type, Map<DateTime, double> data) =>
+      _saveLocal(account, type, data);
+
 
   static Future<void> setValue(String account, TrackerType type, DateTime date, double value) async {
     final data = await load(account, type);
@@ -164,6 +175,20 @@ class TrackerStore {
     final data = await load(account, type);
     data.remove(DateTime(date.year, date.month, date.day));
     await _save(account, type, data);
+  }
+
+  /// Salin catatan tracker milik guest ke akun [account] kalau akun itu belum
+  /// punya catatan untuk tracker yang sama. Data guest tetap ada.
+  static Future<void> adoptGuestData(String account) async {
+    final prefs = await SharedPreferences.getInstance();
+    for (final info in TrackerInfo.all) {
+      final guestList = prefs.getStringList(_prefsKey('guest', info.type));
+      final accountList = prefs.getStringList(_prefsKey(account, info.type));
+      final accountEmpty = accountList == null || accountList.isEmpty;
+      if (accountEmpty && guestList != null && guestList.isNotEmpty) {
+        await prefs.setStringList(_prefsKey(account, info.type), guestList);
+      }
+    }
   }
 
   /// Hapus semua catatan akun ini (dipakai saat hapus akun).

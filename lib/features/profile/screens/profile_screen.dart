@@ -13,6 +13,8 @@ import '../../../core/services/reminder_service.dart';
 import '../../../core/services/cycle_settings.dart';
 import '../../reports/screens/reports_screen.dart';
 import '../../../core/services/tracker_store.dart';
+import '../../../core/services/auth_service.dart';
+import '../../../core/services/cloud_sync.dart';
 
 enum ProfileSubPage { main, editProfile, cycleSettings, reminders, privacySettings, help }
 
@@ -91,6 +93,13 @@ class _ProfileDraft {
   static String weight = '';
   static String? imagePath;
   static bool isMetric = true;
+  static void loadFrom(Map<String, dynamic> m) {
+    gender = m['gender'] as String?;
+    dob = (m['dob'] ?? '') as String;
+    height = (m['height'] ?? '') as String;
+    weight = (m['weight'] ?? '') as String;
+    isMetric = m['isMetric'] as bool? ?? true;
+  }
 
   // Pilihan persetujuan (consent) opsional
   static bool consentAnalytics = false;
@@ -279,6 +288,9 @@ class _ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserv
     _emailController = TextEditingController(text: email);
 
     // Data tambahan profil dipulihkan dari memori
+    if (isUserLoggedIn && CloudSync.profile != null) {
+      _ProfileDraft.loadFrom(CloudSync.profile!);
+    }
     _dobController = TextEditingController(text: _ProfileDraft.dob);
     _heightController = TextEditingController(text: _ProfileDraft.height);
     _weightController = TextEditingController(text: _ProfileDraft.weight);
@@ -546,7 +558,7 @@ class _ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserv
       _showSnackBar('Name cannot be empty');
       return;
     }
-    if (!_emailRegex.hasMatch(newEmail)) {
+    if (!newEmail.startsWith('+') && !_emailRegex.hasMatch(newEmail)) {
       _showSnackBar('Please enter a valid email address');
       return;
     }
@@ -573,6 +585,15 @@ class _ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserv
       RegisteredAccount.name = newName;
     }
 
+    CloudSync.pushProfile({
+      'gender': _selectedGender,
+      'dob': _dobController.text,
+      'height': heightText,
+      'weight': weightText,
+      'isMetric': _isMetricSystem,
+    });
+    if (_isLoggedIn) AuthService.instance.updateDisplayName(newName);
+
     setState(() {
       _nameController.text = newName;
       _emailController.text = newEmail;
@@ -596,17 +617,18 @@ class _ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserv
             onPressed: () async {
               Navigator.pop(dialogContext);
 
-              final cycleProvider = context.read<CycleProvider>();
-
+              await AuthService.instance.signOut();
+              CloudSync.clear();
+              _ProfileDraft.clear();
               isUserLoggedIn = false;
               globalUserData = null;
 
-              // Kosongkan data akun, lalu aktifkan kembali data guest
+              // Kembali ke data tamu di perangkat ini
               CycleSettings.unload();
               await CycleSettings.loadGuest();
-              cycleProvider.reloadFromSettings();
-
               if (!mounted) return;
+              context.read<CycleProvider>().reloadFromSettings();
+
               setState(() {
                 _isLoggedIn = false;
                 _currentPage = ProfileSubPage.main;
@@ -614,6 +636,54 @@ class _ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserv
               _showSnackBar('Logged out successfully.');
             },
             child: const Text('Log out', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Hapus akun Firebase. Return false kalau gagal/dibatalkan.
+  Future<bool> _deleteFirebaseAccount() async {
+    String? password;
+    while (true) {
+      try {
+        return await AuthService.instance.deleteAccount(
+          password: password,
+          beforeDelete: CloudSync.deleteMyData,);
+      } on AuthException catch (e) {
+        if (!mounted) return false;
+        if (e.needsPassword) {
+          password = await _askPasswordDialog();
+          if (password == null) return false; // dibatalkan
+          continue;
+        }
+        _showSnackBar(e.message);
+        return false;
+      }
+    }
+  }
+
+  Future<String?> _askPasswordDialog() async {
+    final controller = TextEditingController();
+    return showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Confirm your password'),
+        content: TextField(
+          controller: controller,
+          obscureText: true,
+          autofocus: true,
+          decoration: const InputDecoration(hintText: 'Enter your password'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+            onPressed: () => Navigator.pop(dialogContext, controller.text),
+            child: const Text('Confirm', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -633,26 +703,30 @@ class _ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserv
             style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
             onPressed: () async {
               Navigator.pop(dialogContext);
+              final email = _emailController.text.trim();
+              final provider = context.read<CycleProvider>();
 
-              final cycleProvider = context.read<CycleProvider>();
-              final accountEmail = _emailController.text.trim();
+              // 0. Hapus akun Firebase dulu. Kalau gagal/dibatalkan, data di HP tidak disentuh.
+              final firebaseDeleted = await _deleteFirebaseAccount();
+              if (!firebaseDeleted || !mounted) return;
 
-              // Hapus pengaturan, survei, dan tanggal haid akun ini dari penyimpanan,
-              // lalu aktifkan kembali data guest dan segarkan Home/Calendar
+              // 1. Hapus data akun ini dulu (setelah ini tidak ada akun aktif)
               await CycleSettings.deleteAccountData();
-              await CycleSettings.loadGuest();
-              cycleProvider.reloadFromSettings();
+              await TrackerStore.clearAccount(email);
+              ReminderService.cancelAll();
 
-              TrackerStore.clearAccount(accountEmail);
+              // 2. Bersihkan provider (tidak menulis apa pun karena tidak ada akun aktif)
+              provider.clearAllData();
 
-              // Hapus akun terdaftar & status login
+              // 3. Hapus akun terdaftar & status login
               RegisteredAccount.clear();
               isUserLoggedIn = false;
               globalUserData = null;
-
-              // Reset data profil
               _ProfileDraft.clear();
-              ReminderService.cancelAll();
+
+              // 4. Aktifkan lagi data tamu di perangkat ini
+              await CycleSettings.loadGuest();
+              provider.reloadFromSettings();
 
               if (!mounted) return;
               setState(() {

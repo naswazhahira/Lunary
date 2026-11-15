@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "1027377779097",
+    "project_id": "lunary-651e1",
+    "storage_bucket": "lunary-651e1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1027377779097:android:5407af5df194c7d3844308",
+        "android_client_info": {
+          "package_name": "com.womankuat.lunary"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1027377779097-o2dl55haleufb0l2dim0lpbd8jg20k86.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.womankuat.lunary",
+            "certificate_hash": "9c432b53a381b5910ec249a435a0bc727a42500e"
+          }
+        },
+        {
+          "client_id": "1027377779097-sv3b1ruv4f1lnouhj31lv944b52468bp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDOPWFOazwg2jfuRIH--ZbNOhEmAmnYVVo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1027377779097-sv3b1ruv4f1lnouhj31lv944b52468bp.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

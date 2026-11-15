@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-
+import '../../../core/services/auth_service.dart';
+import '../../../core/routing/app_navigation.dart';
 import 'package:lunary/features/home/screens/home_screen.dart';
 import '../../../core/services/cycle_settings.dart';
 import 'package:provider/provider.dart';
@@ -9,6 +10,7 @@ import '../../../core/providers/cycle_provider.dart';
 import '../../survey/screens/cycle_survey_screen.dart';
 import '../widgets/crescent_mark_painter.dart';
 import '../widgets/cycle_ring_painter.dart';
+import '../../../core/services/cloud_sync.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
@@ -145,6 +147,30 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Future<void> _goNext() async {
+    // 1. Sudah pernah login? Pulihkan sesi dan langsung ke Home (tanpa survei)
+    final saved = await AuthService.instance.restoreSession();
+    if (saved != null && (saved['email'] ?? '').isNotEmpty) {
+      isUserLoggedIn = true;
+      globalUserData = saved;
+
+      final email = saved['email']!;
+      final pull = await CloudSync.pullAll(email);
+      await CycleSettings.loadFor(email);
+      if (!mounted) return;
+
+      context.read<CycleProvider>().reloadFromSettings();
+      if (pull == CloudPull.none) {
+        await CloudSync.pushAll(email); // akun lama: unggah data yang sudah ada di HP
+      }
+      if (!mounted) return;
+
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+      );
+      return;
+    }
+
+    // 2. Belum login: alur tamu seperti sebelumnya
     await CycleSettings.loadGuest();
     final surveyDone = await CycleSettings.isSurveyDone(CycleSettings.guestId);
     if (!mounted) return;
