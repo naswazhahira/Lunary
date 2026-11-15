@@ -7,8 +7,9 @@ import '../../features/insights/screens/insights_screen.dart';
 import '../../features/profile/screens/profile_screen.dart';
 import '../../features/profile/screens/login_screen.dart';
 import '../../features/lunary_ai/screens/lunary_ai_screen.dart';
-import '../../features/survey/screens/cycle_survey_screen.dart';
 import '../services/cycle_settings.dart';
+import '../services/cloud_sync.dart';
+import '../services/tracker_store.dart';
 
 enum AppNavTab {
   cycle,
@@ -71,26 +72,29 @@ void checkAuthAndExecute(BuildContext context, {required VoidCallback onSuccess}
   }
 }
 
-/// Dipanggil setelah login/register berhasil.
-/// Memuat pengaturan siklus milik akun, lalu menampilkan survei kalau akun ini
-/// belum pernah melihatnya (sekali per akun).
-/// Return true kalau survei baru saja ditampilkan (diisi atau dilewati).
 Future<bool> showSurveyIfNeeded(BuildContext context, String email) async {
-  // Kalau guest sudah mengisi survei, jawaban dan tanggal haidnya dipindah ke akun ini
-  await CycleSettings.adoptGuestDataInto(email);
+  // 1. Data di cloud menang
+  final pull = await CloudSync.pullAll(email);
+
+  // 2. Belum ada data di cloud: pindahkan data tamu ke akun ini seperti biasa
+  if (pull == CloudPull.none) {
+    final adopted = await CycleSettings.adoptGuestDataInto(email);
+    if (adopted) {
+      await TrackerStore.adoptGuestData(email);
+    }
+  }
+
   await CycleSettings.loadFor(email);
   if (!context.mounted) return false;
-
-  // Segarkan data haid di Home/Calendar sesuai akun yang baru login
   context.read<CycleProvider>().reloadFromSettings();
 
-  final done = await CycleSettings.isSurveyDone(email);
-  if (done || !context.mounted) return false;
+  // 3. Akun baru di cloud: unggah data lokal sekarang
+  if (pull == CloudPull.none) {
+    await CloudSync.pushAll(email);
+  }
 
-  await Navigator.of(context).push(
-    MaterialPageRoute(builder: (_) => const CycleSurveyScreen()),
-  );
-  return true;
+  // Survei tidak ditampilkan lagi setelah login
+  return false;
 }
 
 // Login / Register prompt pop-up

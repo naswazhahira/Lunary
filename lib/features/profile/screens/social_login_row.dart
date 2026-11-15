@@ -1,16 +1,23 @@
-
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+
+const String _googleLogoSvg = '''
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+  <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+  <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+  <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+</svg>
+''';
 
 class SocialLoginRow extends StatelessWidget {
   final VoidCallback? onGoogleTap;
-  final VoidCallback? onFacebookTap;
   final VoidCallback? onPhoneTap;
   final double size;
 
   const SocialLoginRow({
     Key? key,
     this.onGoogleTap,
-    this.onFacebookTap,
     this.onPhoneTap,
     this.size = 46,
   }) : super(key: key);
@@ -21,8 +28,6 @@ class SocialLoginRow extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         _circle(child: const _GoogleLogo(), onTap: onGoogleTap),
-        const SizedBox(width: 16),
-        _circle(child: const _FacebookLogo(), onTap: onFacebookTap),
         const SizedBox(width: 16),
         _circle(child: const _PhoneLogo(), onTap: onPhoneTap),
       ],
@@ -59,60 +64,7 @@ class _GoogleLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ShaderMask(
-      blendMode: BlendMode.srcIn,
-      shaderCallback: (bounds) => const SweepGradient(
-        colors: [
-          Color(0xFF4285F4),
-          Color(0xFF4285F4),
-          Color(0xFF34A853),
-          Color(0xFF34A853),
-          Color(0xFFFBBC05),
-          Color(0xFFFBBC05),
-          Color(0xFFEA4335),
-          Color(0xFFEA4335),
-        ],
-        stops: [0.0, 0.25, 0.25, 0.5, 0.5, 0.75, 0.75, 1.0],
-      ).createShader(bounds),
-      child: const Text(
-        'G',
-        style: TextStyle(
-          fontSize: 26,
-          fontWeight: FontWeight.w800,
-          color: Colors.white,
-          height: 1.1,
-        ),
-      ),
-    );
-  }
-}
-
-class _FacebookLogo extends StatelessWidget {
-  const _FacebookLogo();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 28,
-      height: 28,
-      decoration: const BoxDecoration(
-        shape: BoxShape.circle,
-        color: Color(0xFF1877F2),
-      ),
-      alignment: Alignment.bottomCenter,
-      child: const Padding(
-        padding: EdgeInsets.only(left: 2),
-        child: Text(
-          'f',
-          style: TextStyle(
-            fontSize: 25,
-            fontWeight: FontWeight.w900,
-            color: Colors.white,
-            height: 1.0,
-          ),
-        ),
-      ),
-    );
+    return SvgPicture.string(_googleLogoSvg, width: 24, height: 24);
   }
 }
 

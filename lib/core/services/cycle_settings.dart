@@ -1,8 +1,10 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import 'cloud_sync.dart';
 
 /// Pengaturan siklus yang dipakai bersama oleh halaman survei,
 /// Profile > Cycle and ovulation, dan CycleProvider.
-/// Disimpan per akun (kunci = email) di shared_preferences.
+/// Disimpan per akun (kunci = email) di shared_preferences,
+/// lalu disinkronkan ke Firestore untuk akun yang login.
 /// Sebelum login, dipakai akun khusus [guestId].
 class CycleSettings {
   CycleSettings._();
@@ -44,6 +46,9 @@ class CycleSettings {
     return result;
   }
 
+  /// True kalau yang aktif adalah akun login (bukan tamu).
+  static bool get isAccountActive => _email != null && _email != guestId;
+
   /// Muat pengaturan milik akun [email] ke memori (dipanggil saat login).
   static Future<void> loadFor(String email) async {
     final prefs = await SharedPreferences.getInstance();
@@ -62,21 +67,21 @@ class CycleSettings {
 
   /// Kalau survei guest sudah diisi dan akun [email] belum pernah survei,
   /// salin jawaban guest (dan tanggal haid) ke akun itu dan tandai survei akun selesai.
-  /// Panggil SEBELUM loadFor(email).
-  static Future<void> adoptGuestDataInto(String email) async {
+  /// Return true kalau data guest baru saja disalin. Panggil SEBELUM loadFor(email).
+  static Future<bool> adoptGuestDataInto(String email) async {
     final prefs = await SharedPreferences.getInstance();
     final accountDone = prefs.getBool(_key(email, 'surveyDone')) ?? false;
     final guestDone = prefs.getBool(_key(guestId, 'surveyDone')) ?? false;
-    if (accountDone || !guestDone) return;
+    if (accountDone || !guestDone) return false;
 
     for (final f in ['cycleLength', 'periodLength', 'lutealPhase']) {
       final v = prefs.getInt(_key(guestId, f));
       if (v != null) await prefs.setInt(_key(email, f), v);
     }
 
-    final guestIrregular = prefs.getBool(_key(guestId, 'irregularCycle'));
-    if (guestIrregular != null) {
-      await prefs.setBool(_key(email, 'irregularCycle'), guestIrregular);
+    for (final f in ['irregularCycle', 'showPregnancyChance', 'showCycleDays']) {
+      final v = prefs.getBool(_key(guestId, f));
+      if (v != null) await prefs.setBool(_key(email, f), v);
     }
 
     final accountDates = prefs.getStringList(_key(email, 'periodDates'));
@@ -88,6 +93,7 @@ class CycleSettings {
     }
 
     await prefs.setBool(_key(email, 'surveyDone'), true);
+    return true;
   }
 
   static Future<bool> isSurveyDone(String email) async {
@@ -100,6 +106,7 @@ class CycleSettings {
     if (email == null) return;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_key(email, 'surveyDone'), true);
+    CloudSync.pushSettings();
   }
 
   /// Simpan nilai yang ada di memori ke akun yang sedang aktif (login atau guest).
@@ -122,6 +129,7 @@ class CycleSettings {
     await prefs.setBool(_key(email, 'showPregnancyChance'), showPregnancyChance);
     await prefs.setBool(_key(email, 'showCycleDays'), showCycleDays);
     await prefs.setBool(_key(email, 'irregularCycle'), irregularCycle);
+    CloudSync.pushSettings();
   }
 
   /// Simpan seluruh tanggal haid ke akun yang sedang aktif.
@@ -135,7 +143,56 @@ class CycleSettings {
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList(_key(email, 'periodDates'), list);
+    CloudSync.pushSettings();
   }
+
+  // ---------------- Sinkronisasi cloud ----------------
+
+  /// Data untuk dikirim ke cloud.
+  static Future<Map<String, dynamic>> toCloudMap() async {
+    final email = _email;
+    final done = email == null ? false : await isSurveyDone(email);
+    return {
+      'cycleLength': cycleLength,
+      'periodLength': periodLength,
+      'lutealPhase': lutealPhase,
+      'showPregnancyChance': showPregnancyChance,
+      'showCycleDays': showCycleDays,
+      'irregularCycle': irregularCycle,
+      'periodDates': (loggedDates.map(_fmt).toList()..sort()),
+      'surveyDone': done,
+    };
+  }
+
+  /// Terapkan data dari cloud ke penyimpanan lokal akun [email].
+  /// Dipanggil SEBELUM loadFor(email).
+  static Future<void> applyCloudMap(String email, Map<String, dynamic> m) async {
+    final prefs = await SharedPreferences.getInstance();
+
+    Future<void> putInt(String field, dynamic v) async {
+      if (v is num) {
+        await prefs.setInt(_key(email, field), v.toInt());
+      } else {
+        await prefs.remove(_key(email, field));
+      }
+    }
+
+    await putInt('cycleLength', m['cycleLength']);
+    await putInt('periodLength', m['periodLength']);
+    await putInt('lutealPhase', m['lutealPhase']);
+    await prefs.setBool(_key(email, 'showPregnancyChance'), m['showPregnancyChance'] as bool? ?? true);
+    await prefs.setBool(_key(email, 'showCycleDays'), m['showCycleDays'] as bool? ?? false);
+    await prefs.setBool(_key(email, 'irregularCycle'), m['irregularCycle'] as bool? ?? false);
+
+    final dates = (m['periodDates'] as List?)?.map((e) => e.toString()).toList() ?? <String>[];
+    await prefs.setStringList(_key(email, 'periodDates'), dates);
+
+    if (m['surveyDone'] == true) {
+      await prefs.setBool(_key(email, 'surveyDone'), true);
+    }
+  }
+
+  // ---------------- Logout & hapus akun ----------------
 
   /// Kosongkan memori (dipanggil saat logout). Data di penyimpanan tetap ada.
   /// Setelah ini panggil [loadGuest] supaya pengaturan guest aktif kembali.
@@ -168,6 +225,7 @@ class CycleSettings {
         await prefs.remove(_key(email, f));
       }
     }
+
     unload();
   }
 }

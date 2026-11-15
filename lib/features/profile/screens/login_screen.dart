@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'register_screen.dart';
 import 'social_login_row.dart';
+import '../../../core/services/auth_service.dart';
+import 'phone_login_screen.dart';
 
 /// Akun yang didaftarkan, disimpan di memori selama aplikasi berjalan,
 /// jadi tetap ada setelah LoginScreen ditutup (dibutuhkan agar bisa login ulang setelah logout).
@@ -28,6 +30,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _passwordController = TextEditingController();
 
   String? _errorMessage;
+  bool _loading = false;
 
   static const Color _bgStart = Color(0xFFEEEBFF);
   static const Color _bgEnd = Color(0xFFF6D8E8);
@@ -78,7 +81,9 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  void _handleLogin() {
+  Future<void> _handleLogin() async {
+    if (_loading) return;
+
     final email = _emailController.text.trim();
     final password = _passwordController.text;
 
@@ -92,28 +97,122 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    if (RegisteredAccount.email == null) {
-      setState(() => _errorMessage = 'No account found. Please sign up first');
-      return;
-    }
-
-    if (email.toLowerCase() != RegisteredAccount.email!.toLowerCase()) {
-      setState(() => _errorMessage = 'Email is not registered');
-      return;
-    }
-
-    if (password != RegisteredAccount.password) {
-      setState(() => _errorMessage = 'Incorrect password');
-      return;
-    }
-
-    _clearError();
-
-    // Login berhasil
-    Navigator.pop(context, {
-      'name': RegisteredAccount.name ?? 'Lunary User',
-      'email': RegisteredAccount.email,
+    setState(() {
+      _loading = true;
+      _errorMessage = null;
     });
+
+    try {
+      final user = await AuthService.instance.signInWithEmail(email, password);
+      if (!mounted) return;
+      Navigator.pop(context, user);
+    } on AuthException catch (e) {
+      if (!mounted) return;
+      setState(() => _errorMessage = e.message);
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _handleGoogle() async {
+    if (_loading) return;
+    setState(() {
+      _loading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final user = await AuthService.instance.signInWithGoogle();
+      if (!mounted) return;
+      if (user != null) Navigator.pop(context, user); // null = dibatalkan
+    } on AuthException catch (e) {
+      if (!mounted) return;
+      setState(() => _errorMessage = e.message);
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _handlePhone() async {
+    final user = await Navigator.push<Map<String, String>>(
+      context,
+      MaterialPageRoute(builder: (_) => const PhoneLoginScreen()),
+    );
+    if (user != null && mounted) Navigator.pop(context, user);
+  }
+
+  Future<void> _showForgotPasswordDialog() async {
+    final controller = TextEditingController(text: _emailController.text.trim());
+    String? error;
+    bool sending = false;
+
+    final sent = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: const Text('Reset password'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Enter your email and we will send you a link to reset your password.',
+                style: TextStyle(fontSize: 13, height: 1.4),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: controller,
+                keyboardType: TextInputType.emailAddress,
+                autofocus: true,
+                decoration: InputDecoration(hintText: 'Enter your email', errorText: error),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: sending ? null : () => Navigator.pop(dialogContext, false),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: _primaryPurple),
+              onPressed: sending
+                  ? null
+                  : () async {
+                final email = controller.text.trim();
+                if (!_emailRegex.hasMatch(email)) {
+                  setDialogState(() => error = 'Please enter a valid email address');
+                  return;
+                }
+                setDialogState(() {
+                  sending = true;
+                  error = null;
+                });
+                try {
+                  await AuthService.instance.sendPasswordReset(email);
+                  if (dialogContext.mounted) Navigator.pop(dialogContext, true);
+                } on AuthException catch (e) {
+                  setDialogState(() {
+                    sending = false;
+                    error = e.message;
+                  });
+                }
+              },
+              child: const Text('Send link', style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (sent == true && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('If that email is registered, a reset link has been sent. Check your inbox and spam folder.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
   void _socialComingSoon(String provider) {
@@ -221,14 +320,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     Align(
                       alignment: Alignment.centerRight,
                       child: GestureDetector(
-                        onTap: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Forgot password tapped'),
-                              behavior: SnackBarBehavior.floating,
-                            ),
-                          );
-                        },
+
+                        onTap: _showForgotPasswordDialog,
+
                         child: const Text(
                           'Forgot password?',
                           style: TextStyle(
@@ -281,8 +375,14 @@ class _LoginScreenState extends State<LoginScreen> {
                             borderRadius: BorderRadius.circular(24),
                           ),
                         ),
-                        onPressed: _handleLogin,
-                        child: const Text(
+                        onPressed: _loading ? null : _handleLogin,
+                        child: _loading
+                            ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                        )
+                            : const Text(
                           'Log In',
                           style: TextStyle(
                             fontSize: 15,
@@ -306,9 +406,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     const SizedBox(height: 18),
                     SocialLoginRow(
                       size: 44,
-                      onGoogleTap: () => _socialComingSoon('Google'),
-                      onFacebookTap: () => _socialComingSoon('Facebook'),
-                      onPhoneTap: () => _socialComingSoon('Phone'),
+                      onGoogleTap: _handleGoogle,
+                      onPhoneTap: _handlePhone,
                     ),
                     const SizedBox(height: 20),
                     Row(

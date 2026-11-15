@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'social_login_row.dart';
+import '../../../core/services/auth_service.dart';
+import 'phone_login_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({Key? key}) : super(key: key);
@@ -15,6 +17,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _confirmPasswordController = TextEditingController();
 
   String? _errorMessage;
+  bool _loading = false;
 
   static const Color _bgStart = Color(0xFFEEEBFF);
   static const Color _bgEnd = Color(0xFFF6D8E8);
@@ -40,53 +43,91 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
-  void _handleRegister() {
+  Future<void> _handleRegister() async {
+    if (_loading) return;
+
     final name = _nameController.text.trim();
     final email = _emailController.text.trim();
     final pass = _passwordController.text;
     final confirmPass = _confirmPasswordController.text;
 
     if (name.isEmpty || email.isEmpty || pass.isEmpty || confirmPass.isEmpty) {
-      setState(() => _errorMessage = 'Mohon lengkapi semua kolom!');
+      setState(() => _errorMessage = 'Please fill in all fields!');
       return;
     }
 
     if (name.length < 3) {
-      setState(() => _errorMessage = 'Nama lengkap minimal 3 karakter');
+      setState(() => _errorMessage = 'Name must be at least 3 characters');
       return;
     }
 
     if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email)) {
-      setState(() => _errorMessage = 'Format email tidak valid');
+      setState(() => _errorMessage = 'Invalid email format');
       return;
     }
 
     if (pass.length < 6) {
-      setState(() => _errorMessage = 'Password minimal 6 karakter');
+      setState(() => _errorMessage = 'Password must be at least 6 characters');
       return;
     }
 
     if (pass != confirmPass) {
-      setState(() => _errorMessage = 'Password dan Konfirmasi Password tidak cocok!');
+      setState(() => _errorMessage = 'Passwords do not match!');
       return;
     }
 
-    _clearError();
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Registrasi Berhasil! Silakan masuk.'),
-        backgroundColor: _primaryPurple,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-
-    // Kirim data kembali ke LoginScreen
-    Navigator.pop(context, {
-      'name': name,
-      'email': email,
-      'password': pass,
+    setState(() {
+      _loading = true;
+      _errorMessage = null;
     });
+
+    try {
+      final user = await AuthService.instance.registerWithEmail(name, email, pass);
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Registration successful!'),
+          backgroundColor: _primaryPurple,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+
+      // Tanpa 'password' -> LoginScreen menganggap ini langsung login
+      Navigator.pop(context, user);
+    } on AuthException catch (e) {
+      if (!mounted) return;
+      setState(() => _errorMessage = e.message);
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _handleGoogle() async {
+    if (_loading) return;
+    setState(() {
+      _loading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final user = await AuthService.instance.signInWithGoogle();
+      if (!mounted) return;
+      if (user != null) Navigator.pop(context, user);
+    } on AuthException catch (e) {
+      if (!mounted) return;
+      setState(() => _errorMessage = e.message);
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _handlePhone() async {
+    final user = await Navigator.push<Map<String, String>>(
+      context,
+      MaterialPageRoute(builder: (_) => const PhoneLoginScreen()),
+    );
+    if (user != null && mounted) Navigator.pop(context, user);
   }
 
   @override
@@ -244,8 +285,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             borderRadius: BorderRadius.circular(24),
                           ),
                         ),
-                        onPressed: _handleRegister,
-                        child: const Text(
+                        onPressed: _loading ? null : _handleRegister,
+                        child: _loading
+                            ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                        )
+                            : const Text(
                           'Sign Up',
                           style: TextStyle(
                             fontSize: 15,
@@ -269,9 +316,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     const SizedBox(height: 18),
                     SocialLoginRow(
                       size: 44,
-                      onGoogleTap: () => Navigator.pop(context, {'name': 'User Google', 'email': 'googleuser@gmail.com'}),
-                      onFacebookTap: () => Navigator.pop(context, {'name': 'User Facebook', 'email': 'fbuser@facebook.com'}),
-                      onPhoneTap: () => Navigator.pop(context, {'name': 'User Phone', 'email': '08123456789'}),
+                      onGoogleTap: _handleGoogle,
+                      onPhoneTap: _handlePhone,
                     ),
                     const SizedBox(height: 20),
                     Row(
