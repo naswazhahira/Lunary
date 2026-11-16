@@ -629,11 +629,11 @@ class _ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserv
               if (!mounted) return;
               context.read<CycleProvider>().reloadFromSettings();
 
-              setState(() {
-                _isLoggedIn = false;
-                _currentPage = ProfileSubPage.main;
-              });
-              _showSnackBar('Logged out successfully.');
+              // Hapus semua halaman, lalu langsung ke Login
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (_) => const LoginGateScreen()),
+                    (route) => false,
+              );
             },
             child: const Text('Log out', style: TextStyle(color: Colors.white)),
           ),
@@ -649,7 +649,8 @@ class _ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserv
       try {
         return await AuthService.instance.deleteAccount(
           password: password,
-          beforeDelete: CloudSync.deleteMyData,);
+          beforeDelete: CloudSync.deleteMyData,
+        );
       } on AuthException catch (e) {
         if (!mounted) return false;
         if (e.needsPassword) {
