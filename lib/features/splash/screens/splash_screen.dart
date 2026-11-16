@@ -8,6 +8,7 @@ import '../../../core/services/cycle_settings.dart';
 import 'package:provider/provider.dart';
 import '../../../core/providers/cycle_provider.dart';
 import '../../survey/screens/cycle_survey_screen.dart';
+import '../../profile/screens/login_screen.dart';
 import '../widgets/crescent_mark_painter.dart';
 import '../widgets/cycle_ring_painter.dart';
 import '../../../core/services/cloud_sync.dart';
@@ -142,7 +143,7 @@ class _SplashScreenState extends State<SplashScreen>
 
     _controller.forward();
 
-    // Setelah animasi selesai: survei (kalau belum pernah) atau langsung Home
+    // Setelah animasi selesai: Home (kalau sesi login tersimpan) atau Login
     _navTimer = Timer(const Duration(milliseconds: 5500), _goNext);
   }
 
@@ -170,27 +171,44 @@ class _SplashScreenState extends State<SplashScreen>
       return;
     }
 
-    // 2. Belum login: alur tamu seperti sebelumnya
-    await CycleSettings.loadGuest();
-    final surveyDone = await CycleSettings.isSurveyDone(CycleSettings.guestId);
+    // 2. Belum login: buka halaman Login
+    if (!mounted) return;
+    final result = await Navigator.of(context).push<dynamic>(
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+    );
+    if (!mounted) return;
+    if (result == null || result is! Map) return; // user menekan back
+
+    final name = (result['name'] ?? 'Lunary User').toString();
+    final email = (result['email'] ?? '').toString();
+
+    isUserLoggedIn = true;
+    globalUserData = {'name': name, 'email': email};
+
+    // 3. Muat data akun, lalu cek perlu survei atau tidak
+    final needsSurvey =
+    email.isEmpty ? false : await prepareAccountAfterLogin(context, email);
     if (!mounted) return;
 
-    // Isi CycleProvider dengan tanggal haid yang tersimpan
-    context.read<CycleProvider>().reloadFromSettings();
-
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (routeContext) => surveyDone
-            ? const HomeScreen()
-            : CycleSurveyScreen(
-          onFinished: () {
-            Navigator.of(routeContext).pushReplacement(
-              MaterialPageRoute(builder: (_) => const HomeScreen()),
-            );
-          },
+    if (needsSurvey) {
+      // Register / akun baru: Survei -> Home
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (routeContext) => CycleSurveyScreen(
+            onFinished: () {
+              Navigator.of(routeContext).pushReplacement(
+                MaterialPageRoute(builder: (_) => const HomeScreen()),
+              );
+            },
+          ),
         ),
-      ),
-    );
+      );
+    } else {
+      // Login akun lama: langsung Home
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+      );
+    }
   }
 
   @override
