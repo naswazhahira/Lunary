@@ -1,13 +1,12 @@
 import 'dart:async';
-import '../widgets/goal_illustration.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/app_bottom_nav_bar.dart';
 import '../../../core/services/cloud_sync.dart';
-import '../../home/screens/home_screen.dart';
 import '../../survey/screens/cycle_survey_screen.dart';
+import '../widgets/goal_illustration.dart';
 import 'onboarding_finish_flow.dart';
 
 /// Penyimpanan jawaban onboarding (tahun lahir & tujuan) per akun.
@@ -47,31 +46,30 @@ class OnboardingStore {
 class _Goal {
   final String id;
   final String label;
-  final IconData icon;
-  final Color color;
 
-  const _Goal(this.id, this.label, this.icon, this.color);
+  const _Goal(this.id, this.label);
 }
 
 const List<_Goal> _goals = [
-  _Goal('get_pregnant', 'Get pregnant', Icons.child_friendly_outlined, Color(0xFF9B7EDE)),
-  _Goal('already_pregnant', "I'm already pregnant", Icons.pregnant_woman_rounded, Color(0xFFED5589)),
-  _Goal('track_period', 'Track my period', Icons.calendar_month_rounded, Color(0xFF4FA3E0)),
-  _Goal('wellbeing', 'Charge my well-being', Icons.bolt_rounded, Color(0xFF7CC35A)),
-  _Goal('weight', 'Manage my weight', Icons.monitor_weight_outlined, Color(0xFF3F8FB5)),
-  _Goal('sex_life', 'Enhance my sex life', Icons.favorite_border_rounded, Color(0xFFB06AB3)),
-  _Goal('discharge', 'Decode my discharge', Icons.water_drop_outlined, Color(0xFF6FA27A)),
-  _Goal('contraception', 'Explore contraception', Icons.medication_outlined, Color(0xFFE8739B)),
+  _Goal('get_pregnant', 'Get pregnant'),
+  _Goal('already_pregnant', "I'm already pregnant"),
+  _Goal('track_period', 'Track my period'),
+  _Goal('wellbeing', 'Charge my well-being'),
+  _Goal('weight', 'Manage my weight'),
+  _Goal('sex_life', 'Enhance my sex life'),
+  _Goal('discharge', 'Decode my discharge'),
+  _Goal('contraception', 'Explore contraception'),
 ];
 
-/// Onboarding akun baru: Nice to meet you -> tahun lahir -> tujuan -> Ready?
-/// -> Survei -> Extras (Gejala/Tinggi/Berat/Komitmen).
+/// Onboarding akun baru:
+/// Nice to meet you -> tahun lahir -> tujuan -> Ready? -> Survei ->
+/// Gejala/Tinggi/Berat/Komitmen -> Home.
 class OnboardingFlowScreen extends StatefulWidget {
   final String name;
   final String email;
 
-  /// false (default): setelah survei dan extras langsung ke Home (dipakai Splash & LoginGate).
-  /// true: setelah survei dan extras kembali ke layar pemanggil (dipakai alur dari Profile/dialog).
+  /// false (default): setelah selesai langsung ke Home (dipakai Splash & LoginGate).
+  /// true: setelah selesai kembali ke layar pemanggil (dipakai alur dari Profile/dialog).
   final bool returnToCaller;
 
   const OnboardingFlowScreen({
@@ -106,7 +104,7 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
     _birthYear = (now - 25).clamp(_minYear, _maxYear).toInt();
     _yearWheel = FixedExtentScrollController(initialItem: _birthYear - _minYear);
 
-    // Tutup SnackBar sisa dari layar sebelumnya (mis. "Registration successful!")
+    // Tutup SnackBar sisa dari layar sebelumnya
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) ScaffoldMessenger.of(context).clearSnackBars();
     });
@@ -445,24 +443,48 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
     );
   }
 
+  /// Tombol utama bergradien pink ke ungu.
   Widget _primaryButton(String label, VoidCallback? onPressed) {
-    return SizedBox(
-      width: double.infinity,
-      height: 52,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primaryPink,
-          disabledBackgroundColor: AppColors.primaryPink.withValues(alpha: 0.35),
-          elevation: 0,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        ),
-        onPressed: onPressed,
-        child: Text(
-          label,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
+    final enabled = onPressed != null;
+    final radius = BorderRadius.circular(16);
+
+    return Opacity(
+      opacity: enabled ? 1 : 0.4,
+      child: SizedBox(
+        width: double.infinity,
+        height: 52,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: radius,
+            gradient: LinearGradient(
+              colors: [AppColors.primaryPink, AppColors.primaryPurple],
+            ),
+            boxShadow: enabled
+                ? [
+              BoxShadow(
+                color: AppColors.primaryPurple.withValues(alpha: 0.3),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ]
+                : null,
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: radius,
+              onTap: onPressed,
+              child: Center(
+                child: Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
       ),

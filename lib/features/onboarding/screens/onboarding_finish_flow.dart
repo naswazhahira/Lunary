@@ -3,12 +3,12 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../core/painters/dashed_circle_painter.dart';
 import '../../../core/services/cloud_sync.dart';
 import '../../../core/services/tracker_store.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/app_bottom_nav_bar.dart';
 import '../../home/screens/home_screen.dart';
+import '../widgets/symptom_illustration.dart';
 
 // -----------------------------------------------------------------------------
 // Helper umum
@@ -27,22 +27,46 @@ BoxDecoration _bgDecoration() => BoxDecoration(
   ),
 );
 
+/// Tombol utama bergradien pink ke ungu.
 Widget _pinkButton(String label, VoidCallback? onPressed, {double? width}) {
-  return SizedBox(
-    width: width ?? double.infinity,
-    height: 52,
-    child: ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.primaryPink,
-        disabledBackgroundColor: AppColors.primaryPink.withValues(alpha: 0.35),
-        elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(26)),
-      ),
-      onPressed: onPressed,
-      child: Text(
-        label,
-        style: const TextStyle(
-            fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+  final enabled = onPressed != null;
+  final radius = BorderRadius.circular(26);
+
+  return Opacity(
+    opacity: enabled ? 1 : 0.4,
+    child: SizedBox(
+      width: width ?? double.infinity,
+      height: 52,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: radius,
+          gradient: LinearGradient(
+            colors: [AppColors.primaryPink, AppColors.primaryPurple],
+          ),
+          boxShadow: enabled
+              ? [
+            BoxShadow(
+              color: AppColors.primaryPurple.withValues(alpha: 0.3),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ]
+              : null,
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: radius,
+            onTap: onPressed,
+            child: Center(
+              child: Text(
+                label,
+                style: const TextStyle(
+                    fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+              ),
+            ),
+          ),
+        ),
       ),
     ),
   );
@@ -341,17 +365,16 @@ class _MascotPainter extends CustomPainter {
 class _Symptom {
   final String id;
   final String label;
-  final IconData icon;
-  const _Symptom(this.id, this.label, this.icon);
+  const _Symptom(this.id, this.label);
 }
 
 const List<_Symptom> _symptomList = [
-  _Symptom('cramps', 'Cramps', Icons.waves_rounded),
-  _Symptom('fatigue', 'Fatigue', Icons.battery_2_bar_rounded),
-  _Symptom('bloating', 'Bloating', Icons.bubble_chart_rounded),
-  _Symptom('tender_breasts', 'Tender breasts', Icons.favorite_rounded),
-  _Symptom('backache', 'Backache', Icons.accessibility_new_rounded),
-  _Symptom('none', 'None of these', Icons.block_rounded),
+  _Symptom('cramps', 'Cramps'),
+  _Symptom('fatigue', 'Fatigue'),
+  _Symptom('bloating', 'Bloating'),
+  _Symptom('tender_breasts', 'Tender breasts'),
+  _Symptom('backache', 'Backache'),
+  _Symptom('none', 'None of these'),
 ];
 
 class OnboardingExtrasFlow extends StatefulWidget {
@@ -504,16 +527,25 @@ class _OnboardingExtrasFlowState extends State<OnboardingExtrasFlow> {
                 : null,
           ),
           Expanded(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: TweenAnimationBuilder<double>(
-                tween: Tween<double>(end: (_step + 1) / 4),
-                duration: const Duration(milliseconds: 300),
-                builder: (_, v, __) => LinearProgressIndicator(
-                  value: v,
-                  minHeight: 6,
-                  backgroundColor: AppColors.primaryPink.withValues(alpha: 0.15),
-                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryPink),
+            child: TweenAnimationBuilder<double>(
+              tween: Tween<double>(end: (_step + 1) / 4),
+              duration: const Duration(milliseconds: 300),
+              builder: (_, v, __) => ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Container(
+                  height: 6,
+                  color: AppColors.primaryPurple.withValues(alpha: 0.12),
+                  alignment: Alignment.centerLeft,
+                  child: FractionallySizedBox(
+                    widthFactor: v,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [AppColors.primaryPink, AppColors.primaryPurple],
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -629,20 +661,25 @@ class _OnboardingExtrasFlowState extends State<OnboardingExtrasFlow> {
         children: [
           AnimatedContainer(
             duration: const Duration(milliseconds: 200),
-            width: 76,
-            height: 76,
+            width: 84,
+            height: 84,
+            padding: const EdgeInsets.all(3),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AppColors.primaryPink.withValues(alpha: selected ? 0.22 : 0.10),
-              border: selected
-                  ? Border.all(color: AppColors.primaryPink, width: 3)
+              border: Border.all(
+                color: selected ? AppColors.primaryPurple : Colors.transparent,
+                width: 3,
+              ),
+              boxShadow: selected
+                  ? [
+                BoxShadow(
+                  color: AppColors.primaryPurple.withValues(alpha: 0.3),
+                  blurRadius: 14,
+                ),
+              ]
                   : null,
             ),
-            child: Icon(
-              s.icon,
-              size: 32,
-              color: s.id == 'none' ? AppColors.subText : AppColors.primaryPink,
-            ),
+            child: SymptomIllustration(id: s.id, size: 72),
           ),
           const SizedBox(height: 8),
           Text(
@@ -875,7 +912,7 @@ class _OnboardingExtrasFlowState extends State<OnboardingExtrasFlow> {
       margin: const EdgeInsets.symmetric(horizontal: 40),
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: AppColors.primaryPink.withValues(alpha: 0.10),
+        color: AppColors.primaryPurple.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(children: [seg('Metric (cm, kg)', true), seg('Imperial (ft, lb)', false)]),
@@ -1066,10 +1103,6 @@ class _CommitPageState extends State<_CommitPage> with TickerProviderStateMixin 
 
   @override
   Widget build(BuildContext context) {
-    final intro = widget.firstName.isEmpty
-        ? 'I will use Lunary to'
-        : 'I, ${widget.firstName}, will use Lunary to';
-
     return LayoutBuilder(
       builder: (context, cons) {
         return Container(
@@ -1084,10 +1117,10 @@ class _CommitPageState extends State<_CommitPage> with TickerProviderStateMixin 
                   child: Column(
                     children: [
                       const SizedBox(height: 70),
-                      Text(
-                        intro,
+                      const Text(
+                        "Let's make Lunary work for you",
                         textAlign: TextAlign.center,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 26,
                           fontWeight: FontWeight.w800,
                           color: AppColors.darkText,
@@ -1096,7 +1129,7 @@ class _CommitPageState extends State<_CommitPage> with TickerProviderStateMixin 
                       ),
                       const SizedBox(height: 12),
                       const Text(
-                        'understand my cycle, know my body better and be ready for anything.',
+                        'Understand your cycle, know your body better and be ready for anything.',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 16,
@@ -1113,7 +1146,7 @@ class _CommitPageState extends State<_CommitPage> with TickerProviderStateMixin 
                         style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w800,
-                          color: AppColors.primaryPink,
+                          color: AppColors.primaryPurple,
                         ),
                       ),
                       const Spacer(flex: 2),
@@ -1186,25 +1219,14 @@ class _CommitPageState extends State<_CommitPage> with TickerProviderStateMixin 
                           colors: [AppColors.primaryPink, AppColors.primaryPurple],
                         ),
                       ),
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          CustomPaint(
-                            size: const Size(112, 112),
-                            painter: DashedCirclePainter(
-                              color: Colors.white.withValues(alpha: 0.7),
-                              strokeWidth: 2,
-                              dashCount: 24,
-                            ),
+                      child: Center(
+                        child: SizedBox(
+                          width: 58,
+                          height: 58,
+                          child: CustomPaint(
+                            painter: LunaryCrescentPainter(baseColor: Colors.white),
                           ),
-                          SizedBox(
-                            width: 54,
-                            height: 54,
-                            child: CustomPaint(
-                              painter: LunaryCrescentPainter(baseColor: Colors.white),
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
                     ),
                   ],
@@ -1252,30 +1274,10 @@ class _CommitPageState extends State<_CommitPage> with TickerProviderStateMixin 
                     ),
                     const SizedBox(height: 30),
                     SizedBox(
-                      width: 120,
-                      height: 120,
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          Transform.rotate(
-                            angle: _fill.value * 3,
-                            child: CustomPaint(
-                              size: const Size(120, 120),
-                              painter: DashedCirclePainter(
-                                color: Colors.white,
-                                strokeWidth: 2.5,
-                                dashCount: 24,
-                              ),
-                            ),
-                          ),
-                          SizedBox(
-                            width: 50,
-                            height: 50,
-                            child: CustomPaint(
-                              painter: LunaryCrescentPainter(baseColor: Colors.white),
-                            ),
-                          ),
-                        ],
+                      width: 64,
+                      height: 64,
+                      child: CustomPaint(
+                        painter: LunaryCrescentPainter(baseColor: Colors.white),
                       ),
                     ),
                   ],
@@ -1335,7 +1337,15 @@ class _FillPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final maxR = math.sqrt(size.width * size.width + size.height * size.height);
-    canvas.drawCircle(center, maxR * t, Paint()..color = color);
+
+    // Gradien seukuran layar, hanya terlihat di dalam lingkaran yang membesar
+    final shader = LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [AppColors.primaryPink, AppColors.primaryPurple],
+    ).createShader(Offset.zero & size);
+
+    canvas.drawCircle(center, maxR * t, Paint()..shader = shader);
   }
 
   @override
