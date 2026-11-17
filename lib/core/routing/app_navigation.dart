@@ -1,7 +1,7 @@
 import 'package:provider/provider.dart';
 import '../providers/cycle_provider.dart';
 import 'package:flutter/material.dart';
-import '../../features/survey/screens/cycle_survey_screen.dart';
+import 'package:lunary/features/onboarding/screens/onboarding_screen.dart';
 import '../../features/home/screens/home_screen.dart';
 import '../../features/calendar/screens/calendar_screen.dart';
 import '../../features/insights/screens/insights_screen.dart';
@@ -74,22 +74,29 @@ void checkAuthAndExecute(BuildContext context, {required VoidCallback onSuccess}
 }
 
 /// Dipakai setelah login/register dari Profile atau dialog "Limited Access".
-/// Memuat data akun, dan kalau akun ini belum pernah survei, membuka survei.
-/// Return true kalau survei baru saja ditampilkan (diisi atau dilewati).
+/// Memuat data akun, dan kalau akun ini belum pernah survei, membuka
+/// Onboarding -> Survei, lalu kembali ke pemanggil.
+/// Return true kalau onboarding/survei baru saja ditampilkan.
 Future<bool> showSurveyIfNeeded(BuildContext context, String email) async {
-  final needsSurvey = await prepareAccountAfterLogin(context, email);
-  if (!needsSurvey || !context.mounted) return false;
+  final needsOnboarding = await prepareAccountAfterLogin(context, email);
+  if (!needsOnboarding || !context.mounted) return false;
 
-  // onFinished dikosongkan: survei akan menutup dirinya sendiri (pop)
+  // Onboarding -> Survei, lalu kembali ke pemanggil
   await Navigator.of(context).push(
-    MaterialPageRoute(builder: (_) => const CycleSurveyScreen()),
+    MaterialPageRoute(
+      builder: (_) => OnboardingFlowScreen(
+        name: globalUserData?['name'] ?? '',
+        email: email,
+        returnToCaller: true,
+      ),
+    ),
   );
   return true;
 }
 
 /// Dipakai setelah login/register.
 /// Memuat data akun (cloud + lokal), lalu mengembalikan true kalau
-/// akun ini belum pernah menyelesaikan survei (artinya perlu tampil survei).
+/// akun ini belum pernah menyelesaikan survei (artinya perlu tampil onboarding + survei).
 Future<bool> prepareAccountAfterLogin(BuildContext context, String email) async {
   // 1. Data di cloud menang
   final pull = await CloudSync.pullAll(email);
@@ -155,13 +162,13 @@ void showLoginRequiredDialog(BuildContext context) {
 
               if (!context.mounted) return;
 
-              // Survei siklus (sekali per akun)
+              // Onboarding + survei (sekali per akun)
               final surveyShown =
               await showSurveyIfNeeded(context, globalUserData!['email']!);
               if (!context.mounted) return;
 
               if (surveyShown) {
-                // Setelah survei (diisi / dilewati) langsung ke beranda
+                // Setelah onboarding + survei langsung ke beranda
                 handleAppNavTap(context, AppNavTab.cycle);
               } else {
                 // Open the Profile page to show the latest login status
@@ -189,7 +196,7 @@ void showLoginRequiredDialog(BuildContext context) {
 }
 
 /// Layar perantara setelah logout: langsung membuka Login, lalu
-/// register/akun baru -> Survei -> Home, login akun lama -> Home.
+/// akun baru -> Onboarding -> Survei -> Home, login akun lama -> Home.
 /// Kalau user menekan back di Login, Login dibuka lagi.
 class LoginGateScreen extends StatefulWidget {
   const LoginGateScreen({super.key});
@@ -222,21 +229,16 @@ class _LoginGateScreenState extends State<LoginGateScreen> {
     isUserLoggedIn = true;
     globalUserData = {'name': name, 'email': email};
 
-    // 2. Muat data akun, lalu cek perlu survei atau tidak
+    // 2. Muat data akun, lalu cek perlu onboarding + survei atau tidak
     final needsSurvey =
     email.isEmpty ? false : await prepareAccountAfterLogin(context, email);
     if (!mounted) return;
 
     if (needsSurvey) {
+      // Akun baru: Onboarding -> Survei -> Home
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (routeContext) => CycleSurveyScreen(
-            onFinished: () {
-              Navigator.of(routeContext).pushReplacement(
-                MaterialPageRoute(builder: (_) => const HomeScreen()),
-              );
-            },
-          ),
+          builder: (_) => OnboardingFlowScreen(name: name, email: email),
         ),
       );
     } else {

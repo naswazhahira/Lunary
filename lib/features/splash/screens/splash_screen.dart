@@ -7,7 +7,7 @@ import 'package:lunary/features/home/screens/home_screen.dart';
 import '../../../core/services/cycle_settings.dart';
 import 'package:provider/provider.dart';
 import '../../../core/providers/cycle_provider.dart';
-import '../../survey/screens/cycle_survey_screen.dart';
+import 'package:lunary/features/onboarding/screens/onboarding_screen.dart';
 import '../../profile/screens/login_screen.dart';
 import '../widgets/crescent_mark_painter.dart';
 import '../widgets/cycle_ring_painter.dart';
@@ -185,22 +185,16 @@ class _SplashScreenState extends State<SplashScreen>
     isUserLoggedIn = true;
     globalUserData = {'name': name, 'email': email};
 
-    // 3. Muat data akun, lalu cek perlu survei atau tidak
+    // 3. Muat data akun, lalu cek perlu onboarding + survei atau tidak
     final needsSurvey =
     email.isEmpty ? false : await prepareAccountAfterLogin(context, email);
     if (!mounted) return;
 
     if (needsSurvey) {
-      // Register / akun baru: Survei -> Home
+      // Akun baru: Onboarding -> Survei -> Home
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (routeContext) => CycleSurveyScreen(
-            onFinished: () {
-              Navigator.of(routeContext).pushReplacement(
-                MaterialPageRoute(builder: (_) => const HomeScreen()),
-              );
-            },
-          ),
+          builder: (_) => OnboardingFlowScreen(name: name, email: email),
         ),
       );
     } else {
