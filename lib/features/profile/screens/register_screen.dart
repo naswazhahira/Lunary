@@ -85,14 +85,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
       final user = await AuthService.instance.registerWithEmail(name, email, pass);
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Registration successful!'),
-          backgroundColor: _primaryPurple,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-
       // Tanpa 'password' -> LoginScreen menganggap ini langsung login
       Navigator.pop(context, user);
     } on AuthException catch (e) {
