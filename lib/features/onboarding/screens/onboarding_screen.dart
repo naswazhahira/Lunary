@@ -8,6 +8,7 @@ import '../../../core/widgets/app_bottom_nav_bar.dart';
 import '../../../core/services/cloud_sync.dart';
 import '../../home/screens/home_screen.dart';
 import '../../survey/screens/cycle_survey_screen.dart';
+import 'onboarding_finish_flow.dart';
 
 /// Penyimpanan jawaban onboarding (tahun lahir & tujuan) per akun.
 class OnboardingStore {
@@ -63,13 +64,14 @@ const List<_Goal> _goals = [
   _Goal('contraception', 'Explore contraception', Icons.medication_outlined, Color(0xFFE8739B)),
 ];
 
-/// Onboarding akun baru: Nice to meet you -> tahun lahir -> tujuan -> Survei.
+/// Onboarding akun baru: Nice to meet you -> tahun lahir -> tujuan -> Ready?
+/// -> Survei -> Extras (Gejala/Tinggi/Berat/Komitmen).
 class OnboardingFlowScreen extends StatefulWidget {
   final String name;
   final String email;
 
-  /// false (default): setelah survei langsung ke Home (dipakai Splash & LoginGate).
-  /// true: setelah survei kembali ke layar pemanggil (dipakai alur dari Profile/dialog).
+  /// false (default): setelah survei dan extras langsung ke Home (dipakai Splash & LoginGate).
+  /// true: setelah survei dan extras kembali ke layar pemanggil (dipakai alur dari Profile/dialog).
   final bool returnToCaller;
 
   const OnboardingFlowScreen({
@@ -84,7 +86,7 @@ class OnboardingFlowScreen extends StatefulWidget {
 }
 
 class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
-  int _step = 0; // 0 welcome, 1 tahun lahir, 2 tujuan
+  int _step = 0; // 0 welcome, 1 tahun lahir, 2 tujuan, 3 ready
   bool _finishing = false;
   Timer? _welcomeTimer;
 
@@ -132,7 +134,11 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
   }
 
   void _back() {
-    if (_step == 2) setState(() => _step = 1);
+    if (_step == 3) {
+      setState(() => _step = 2);
+    } else if (_step == 2) {
+      setState(() => _step = 1);
+    }
   }
 
   Future<void> _finish() async {
@@ -143,10 +149,21 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
     if (!mounted) return;
 
     final nav = Navigator.of(context);
+    final firstName = _firstName;
 
     if (widget.returnToCaller) {
-      // Survei menutup dirinya sendiri, lalu onboarding ikut ditutup
+      // Survei -> Gejala/Tinggi/Berat/Komitmen, lalu onboarding ikut ditutup
       await nav.push(MaterialPageRoute(builder: (_) => const CycleSurveyScreen()));
+      if (!mounted) return;
+      await nav.push(
+        MaterialPageRoute(
+          builder: (_) => OnboardingExtrasFlow(
+            firstName: firstName,
+            email: widget.email,
+            returnToCaller: true,
+          ),
+        ),
+      );
       if (mounted) nav.pop();
     } else {
       nav.pushReplacement(
@@ -154,7 +171,12 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
           builder: (_) => CycleSurveyScreen(
             onFinished: () {
               nav.pushReplacement(
-                MaterialPageRoute(builder: (_) => const HomeScreen()),
+                MaterialPageRoute(
+                  builder: (_) => OnboardingExtrasFlow(
+                    firstName: firstName,
+                    email: widget.email,
+                  ),
+                ),
               );
             },
           ),
@@ -190,7 +212,9 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
               stops: const [0.0, 0.6, 1.0],
             ),
           ),
-          child: SafeArea(
+          child: _step == 3
+              ? OnboardingReadyPage(onReady: _finish)
+              : SafeArea(
             child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 350),
               child: _buildStep(),
@@ -306,7 +330,7 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
               ),
               const Spacer(),
               TextButton(
-                onPressed: _finishing ? null : _finish,
+                onPressed: () => setState(() => _step = 3),
                 child: Text(
                   'Skip',
                   style: TextStyle(
@@ -357,7 +381,7 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
           padding: const EdgeInsets.fromLTRB(20, 4, 20, 20),
           child: _primaryButton(
             'Continue',
-            _selectedGoals.isEmpty || _finishing ? null : _finish,
+            _selectedGoals.isEmpty ? null : () => setState(() => _step = 3),
           ),
         ),
       ],
