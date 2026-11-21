@@ -41,6 +41,33 @@ class OnboardingStore {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getStringList(_key(email, 'goals')) ?? const [];
   }
+  /// Pulihkan jawaban onboarding dari profil cloud (login di perangkat baru).
+  static Future<void> restoreFromCloud(String email) async {
+    final p = CloudSync.profile;
+    if (p == null || email.isEmpty) return;
+    final prefs = await SharedPreferences.getInstance();
+
+    final year = p['birthYear'];
+    if (year is num) {
+      await prefs.setInt(_key(email, 'birthYear'), year.toInt());
+    }
+
+    final goals = p['goals'];
+    if (goals is List) {
+      await prefs.setStringList(
+        _key(email, 'goals'),
+        goals.map((e) => e.toString()).toList(),
+      );
+    }
+
+    final symptoms = p['symptoms'];
+    if (symptoms is List) {
+      await prefs.setStringList(
+        _key(email, 'symptoms'),
+        symptoms.map((e) => e.toString()).toList(),
+      );
+    }
+  }
 }
 
 class _Goal {
