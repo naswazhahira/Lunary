@@ -64,9 +64,9 @@ class CloudSync {
   static void pushProfile(Map<String, dynamic> data) {
     final doc = _userDoc;
     if (doc == null) return;
-    profile = data;
+    profile = {...?profile, ...data};
     unawaited(doc
-        .set({'profile': data, 'updatedAt': FieldValue.serverTimestamp()},
+        .set({'profile': profile, 'updatedAt': FieldValue.serverTimestamp()},
         SetOptions(merge: true))
         .catchError((_) {}));
   }
