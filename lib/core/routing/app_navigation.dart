@@ -100,6 +100,9 @@ Future<bool> showSurveyIfNeeded(BuildContext context, String email) async {
 Future<bool> prepareAccountAfterLogin(BuildContext context, String email) async {
   // 1. Data di cloud menang
   final pull = await CloudSync.pullAll(email);
+  if (pull == CloudPull.applied) {
+    await OnboardingStore.restoreFromCloud(email);
+  }
 
   // 2. Belum ada data di cloud: pindahkan data tamu (kalau ada)
   if (pull == CloudPull.none) {
