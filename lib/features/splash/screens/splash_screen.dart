@@ -156,6 +156,9 @@ class _SplashScreenState extends State<SplashScreen>
 
       final email = saved['email']!;
       final pull = await CloudSync.pullAll(email);
+      if (pull == CloudPull.applied) {
+        await OnboardingStore.restoreFromCloud(email);
+      }
       await CycleSettings.loadFor(email);
       if (!mounted) return;
 
